@@ -1,26 +1,310 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Matrix color scheme */
+  --background: #000000;
+  --foreground: #00FF41;
+
+  /* Matrix greens */
+  --matrix-green: #00FF41;
+  --matrix-green-dim: #00CC33;
+  --matrix-green-dark: #003B00;
+  --matrix-green-glow: rgba(0, 255, 65, 0.6);
+
+  /* Matrix reds (for red pill mode) */
+  --matrix-red: #FF0000;
+  --matrix-red-dim: #CC0000;
+  --matrix-red-glow: rgba(255, 0, 0, 0.6);
+
+  /* Text colors - bright for readability */
+  --text-primary: #FFFFFF;
+  --text-secondary: #E0E0E0;
+  --text-muted: #A0A0A0;
+
+  /* Surface colors */
+  --surface-primary: #000000;
+  --surface-secondary: #0D0D0D;
+  --surface-tertiary: #1A1A1A;
+  --border-color: #003B00;
+
+  /* Accent colors - green mode */
+  --accent-primary: #00FF41;
+  --accent-primary-hover: #00CC33;
+  --accent-highlight: #00FF41;
+  --accent-muted: rgba(0, 255, 65, 0.1);
+
+  /* Red accent colors */
+  --red-accent: #FF0000;
+  --red-accent-hover: #CC0000;
+  --red-highlight: #FF3333;
+  --red-muted: rgba(255, 0, 0, 0.1);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-matrix), monospace;
+  --font-mono: var(--font-matrix), monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  font-family: var(--font-matrix), 'Courier New', monospace !important;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-matrix), 'Courier New', monospace;
+  overflow-x: hidden;
+}
+
+/* CRT Scanlines Effect */
+.crt-scanlines {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+}
+
+/* CRT Flicker Animation */
+@keyframes flicker {
+  0% { opacity: 0.97; }
+  5% { opacity: 0.95; }
+  10% { opacity: 0.97; }
+  15% { opacity: 0.94; }
+  20% { opacity: 0.98; }
+  25% { opacity: 0.96; }
+  30% { opacity: 0.97; }
+  35% { opacity: 0.95; }
+  40% { opacity: 0.98; }
+  45% { opacity: 0.96; }
+  50% { opacity: 0.97; }
+  55% { opacity: 0.95; }
+  60% { opacity: 0.98; }
+  65% { opacity: 0.96; }
+  70% { opacity: 0.97; }
+  75% { opacity: 0.94; }
+  80% { opacity: 0.98; }
+  85% { opacity: 0.96; }
+  90% { opacity: 0.97; }
+  95% { opacity: 0.95; }
+  100% { opacity: 0.98; }
+}
+
+.crt-flicker {
+  animation: flicker 0.15s infinite;
+}
+
+/* Text Glow Effect */
+.text-glow {
+  text-shadow:
+    0 0 5px var(--matrix-green),
+    0 0 10px var(--matrix-green),
+    0 0 20px var(--matrix-green),
+    0 0 40px var(--matrix-green-dim);
+}
+
+.text-glow-red {
+  text-shadow:
+    0 0 5px var(--matrix-red),
+    0 0 10px var(--matrix-red),
+    0 0 20px var(--matrix-red),
+    0 0 40px var(--matrix-red-dim);
+}
+
+.text-glow-subtle {
+  text-shadow:
+    0 0 5px var(--matrix-green),
+    0 0 10px var(--matrix-green-dim);
+}
+
+/* Box Glow Effect */
+.box-glow {
+  box-shadow:
+    0 0 5px var(--matrix-green),
+    0 0 10px var(--matrix-green),
+    inset 0 0 5px var(--matrix-green-dark);
+}
+
+.box-glow-red {
+  box-shadow:
+    0 0 5px var(--matrix-red),
+    0 0 10px var(--matrix-red),
+    inset 0 0 5px var(--matrix-red-dim);
+}
+
+/* Glitch Effect */
+@keyframes glitch {
+  0% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+  100% {
+    transform: translate(0);
+  }
+}
+
+.glitch {
+  animation: glitch 0.3s ease-in-out;
+}
+
+@keyframes glitch-text {
+  0% {
+    clip-path: inset(40% 0 61% 0);
+    transform: translate(-2px, -2px);
+  }
+  20% {
+    clip-path: inset(92% 0 1% 0);
+    transform: translate(2px, 2px);
+  }
+  40% {
+    clip-path: inset(43% 0 1% 0);
+    transform: translate(-2px, 2px);
+  }
+  60% {
+    clip-path: inset(25% 0 58% 0);
+    transform: translate(2px, -2px);
+  }
+  80% {
+    clip-path: inset(54% 0 7% 0);
+    transform: translate(-2px, 2px);
+  }
+  100% {
+    clip-path: inset(58% 0 43% 0);
+    transform: translate(2px, -2px);
+  }
+}
+
+/* Matrix Button Style */
+.matrix-btn {
+  background: transparent;
+  border: 1px solid var(--matrix-green);
+  color: var(--matrix-green);
+  padding: 0.5rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.matrix-btn:hover {
+  background: var(--matrix-green);
+  color: var(--background);
+  box-shadow:
+    0 0 10px var(--matrix-green),
+    0 0 20px var(--matrix-green),
+    0 0 40px var(--matrix-green);
+}
+
+.matrix-btn-red {
+  border-color: var(--matrix-red);
+  color: var(--matrix-red);
+}
+
+.matrix-btn-red:hover {
+  background: var(--matrix-red);
+  box-shadow:
+    0 0 10px var(--matrix-red),
+    0 0 20px var(--matrix-red),
+    0 0 40px var(--matrix-red);
+}
+
+/* Terminal cursor blink */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.cursor-blink {
+  animation: blink 1s infinite;
+}
+
+/* Typing animation */
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.typing {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typing 2s steps(40, end);
+}
+
+/* Custom scrollbar - Matrix style */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+  border-left: 1px solid var(--matrix-green-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--matrix-green-dark);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--matrix-green-dim);
+}
+
+/* Selection color */
+::selection {
+  background: var(--matrix-green);
+  color: var(--background);
+}
+
+/* Focus ring styles */
+.focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.focus-ring:focus-visible {
+  outline-color: var(--matrix-green);
+}
+
+/* Screen vignette effect */
+.vignette {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 60%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+}
+
+/* Disable default transitions for instant Matrix feel */
+.no-transition {
+  transition: none !important;
 }

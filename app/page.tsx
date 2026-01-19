@@ -1,65 +1,156 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
+import { Header } from "@/components/layout/header";
+import { Hero } from "@/components/sections/hero";
+import { BluePillContent } from "@/components/sections/blue-pill-content";
+import { RedPillContent } from "@/components/sections/red-pill-content";
+import { MatrixRain } from "@/components/ui/matrix-rain";
+import { MatrixIntro } from "@/components/ui/matrix-intro";
+import { ModeProvider, useMode } from "@/hooks/use-mode";
+import { cn } from "@/lib/utils";
+
+function MainContent() {
+  const { mode } = useMode();
+  const isRedMode = mode === "red";
+  const [showIntro, setShowIntro] = useState(true);
+  const [introComplete, setIntroComplete] = useState(false);
+
+  // Check if intro has been shown before in this session
+  useEffect(() => {
+    const hasSeenIntro = sessionStorage.getItem("matrixIntroSeen");
+    if (hasSeenIntro) {
+      setShowIntro(false);
+      setIntroComplete(true);
+    }
+  }, []);
+
+  const handleIntroComplete = () => {
+    sessionStorage.setItem("matrixIntroSeen", "true");
+    setShowIntro(false);
+    setTimeout(() => setIntroComplete(true), 500);
+  };
+
+  // Handle key press to skip intro
+  useEffect(() => {
+    if (!showIntro) return;
+    const handleKeyPress = () => handleIntroComplete();
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [showIntro]);
+
+  return (
+    <>
+      {/* Matrix Intro */}
+      <AnimatePresence>
+        {showIntro && <MatrixIntro onComplete={handleIntroComplete} />}
+      </AnimatePresence>
+
+      {/* Main Content - only render after intro */}
+      {introComplete && (
+        <>
+          {/* Matrix Rain Background */}
+          <MatrixRain />
+
+          {/* CRT Effects */}
+          <div className="crt-scanlines" />
+          <div className="vignette" />
+
+          {/* Main wrapper with flicker */}
+          <div className="crt-flicker">
+            <Header />
+
+            <div className="min-h-screen bg-transparent relative z-10">
+              <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex">
+                  {/* Left Navigation Sidebar */}
+                  <aside className="hidden md:block w-36 flex-shrink-0 pt-24 pr-8">
+                    <nav className="sticky top-24 space-y-8">
+                      <a
+                        href="#about"
+                        className={cn(
+                          "block text-xl transition-all hover:text-glow-subtle",
+                          isRedMode
+                            ? "text-[var(--matrix-red-dim)] hover:text-[var(--matrix-red)]"
+                            : "text-[var(--matrix-green-dim)] hover:text-[var(--matrix-green)]"
+                        )}
+                      >
+                        {">"} about
+                      </a>
+                      <a
+                        href="#experience"
+                        className={cn(
+                          "block text-xl transition-all hover:text-glow-subtle",
+                          isRedMode
+                            ? "text-[var(--matrix-red-dim)] hover:text-[var(--matrix-red)]"
+                            : "text-[var(--matrix-green-dim)] hover:text-[var(--matrix-green)]"
+                        )}
+                      >
+                        {">"} work
+                      </a>
+                      <a
+                        href="#projects"
+                        className={cn(
+                          "block text-xl transition-all hover:text-glow-subtle",
+                          isRedMode
+                            ? "text-[var(--matrix-red-dim)] hover:text-[var(--matrix-red)]"
+                            : "text-[var(--matrix-green-dim)] hover:text-[var(--matrix-green)]"
+                        )}
+                      >
+                        {">"} built
+                      </a>
+                      <a
+                        href="#contact"
+                        className={cn(
+                          "block text-xl transition-all hover:text-glow-subtle",
+                          isRedMode
+                            ? "text-[var(--matrix-red-dim)] hover:text-[var(--matrix-red)]"
+                            : "text-[var(--matrix-green-dim)] hover:text-[var(--matrix-green)]"
+                        )}
+                      >
+                        {">"} contact
+                      </a>
+                    </nav>
+                  </aside>
+
+                  {/* Main Content */}
+                  <main className="flex-1 pt-16 pb-20 md:pl-8 md:border-l md:border-[var(--matrix-green-dark)]">
+                    {/* Hero stays persistent */}
+                    <Hero />
+
+                    {/* Content switches based on mode */}
+                    <AnimatePresence mode="wait">
+                      {isRedMode ? (
+                        <RedPillContent key="red" />
+                      ) : (
+                        <BluePillContent key="blue" />
+                      )}
+                    </AnimatePresence>
+                  </main>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <footer className="border-t border-[var(--matrix-green-dark)] py-6 relative z-10">
+              <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <p className="text-center text-[var(--text-muted)] text-sm">
+                  {">"} SYSTEM.COPYRIGHT © {new Date().getFullYear()} | parag ambildhuke | all_rights_reserved_
+                </p>
+              </div>
+            </footer>
+          </div>
+        </>
+      )}
+    </>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <ModeProvider>
+      <MainContent />
+    </ModeProvider>
   );
 }
