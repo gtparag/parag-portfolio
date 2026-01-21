@@ -1,321 +1,468 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MatrixRain } from "@/components/ui/matrix-rain";
-
-type DoorChoice = "red" | "blue" | null;
 
 interface PillSelectionProps {
   onSelect: (choice: "red" | "blue") => void;
 }
 
+interface Car {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  speed: number;
+  horizontalSpeed: number;
+}
+
+interface Obstacle {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  type: "cone" | "barrier";
+}
+
+interface Door {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: "red" | "blue";
+  label: string;
+}
+
 export function PillSelection({ onSelect }: PillSelectionProps) {
-  const [hoveredDoor, setHoveredDoor] = useState<DoorChoice>(null);
-  const [selectedDoor, setSelectedDoor] = useState<DoorChoice>(null);
-  const [animationPhase, setAnimationPhase] = useState<
-    "idle" | "door-opening" | "light-flood" | "transition"
-  >("idle");
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [gameState, setGameState] = useState<"intro" | "playing" | "finished">("intro");
+  const [selectedDoor, setSelectedDoor] = useState<"red" | "blue" | null>(null);
+  const keysPressed = useRef<Set<string>>(new Set());
+  const gameLoopRef = useRef<number>();
+  const carRef = useRef<Car>({
+    x: 0,
+    y: 0,
+    width: 40,
+    height: 70,
+    speed: 4,
+    horizontalSpeed: 5,
+  });
+  const obstaclesRef = useRef<Obstacle[]>([]);
+  const doorsRef = useRef<Door[]>([]);
 
-  const handleDoorClick = (door: "red" | "blue") => {
-    if (animationPhase !== "idle") return;
+  // Initialize game
+  const initGame = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    setSelectedDoor(door);
-    setAnimationPhase("door-opening");
+    const width = canvas.width;
+    const height = canvas.height;
 
-    // Sequence the animation phases
-    setTimeout(() => setAnimationPhase("light-flood"), 800);
-    setTimeout(() => setAnimationPhase("transition"), 1600);
-    setTimeout(() => onSelect(door), 2400);
-  };
+    // Position car at bottom center
+    carRef.current = {
+      x: width / 2 - 20,
+      y: height - 120,
+      width: 40,
+      height: 70,
+      speed: 4,
+      horizontalSpeed: 5,
+    };
+
+    // Create doors at the top
+    const doorWidth = 120;
+    const doorHeight = 100;
+    const doorY = 30;
+    const gap = 100;
+
+    doorsRef.current = [
+      {
+        x: width / 2 - doorWidth - gap / 2,
+        y: doorY,
+        width: doorWidth,
+        height: doorHeight,
+        color: "red",
+        label: "THE REAL ME",
+      },
+      {
+        x: width / 2 + gap / 2,
+        y: doorY,
+        width: doorWidth,
+        height: doorHeight,
+        color: "blue",
+        label: "PROFESSIONAL",
+      },
+    ];
+
+    // Create obstacles (cones and barriers)
+    obstaclesRef.current = [
+      // Row 1
+      { x: width / 2 - 15, y: height - 250, width: 30, height: 30, type: "cone" },
+      // Row 2
+      { x: width / 2 - 120, y: height - 350, width: 30, height: 30, type: "cone" },
+      { x: width / 2 + 90, y: height - 350, width: 30, height: 30, type: "cone" },
+      // Row 3 - barrier in middle forcing choice
+      { x: width / 2 - 40, y: height - 480, width: 80, height: 20, type: "barrier" },
+      // Row 4
+      { x: width / 2 - 180, y: height - 550, width: 30, height: 30, type: "cone" },
+      { x: width / 2 + 150, y: height - 550, width: 30, height: 30, type: "cone" },
+      // Final barrier to separate lanes
+      { x: width / 2 - 20, y: height - 700, width: 40, height: 150, type: "barrier" },
+    ];
+  }, []);
+
+  // Handle keyboard input
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      keysPressed.current.add(e.key.toLowerCase());
+      if (e.key === " " && gameState === "intro") {
+        setGameState("playing");
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      keysPressed.current.delete(e.key.toLowerCase());
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [gameState]);
+
+  // Set canvas size
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const resize = () => {
+      canvas.width = Math.min(600, window.innerWidth - 40);
+      canvas.height = Math.min(800, window.innerHeight - 100);
+      initGame();
+    };
+
+    resize();
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+  }, [initGame]);
+
+  // Game loop
+  useEffect(() => {
+    if (gameState !== "playing") return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const gameLoop = () => {
+      const car = carRef.current;
+      const obstacles = obstaclesRef.current;
+      const doors = doorsRef.current;
+
+      // Update car position based on keys
+      if (keysPressed.current.has("arrowleft") || keysPressed.current.has("a")) {
+        car.x -= car.horizontalSpeed;
+      }
+      if (keysPressed.current.has("arrowright") || keysPressed.current.has("d")) {
+        car.x += car.horizontalSpeed;
+      }
+
+      // Auto-move forward
+      car.y -= car.speed;
+
+      // Keep car in bounds
+      car.x = Math.max(20, Math.min(canvas.width - car.width - 20, car.x));
+
+      // Check collision with obstacles
+      for (const obs of obstacles) {
+        if (
+          car.x < obs.x + obs.width &&
+          car.x + car.width > obs.x &&
+          car.y < obs.y + obs.height &&
+          car.y + car.height > obs.y
+        ) {
+          // Push car back/around obstacle
+          if (obs.type === "barrier") {
+            car.y = obs.y + obs.height + 5;
+          } else {
+            // Bounce off cone
+            if (car.x + car.width / 2 < obs.x + obs.width / 2) {
+              car.x = obs.x - car.width - 5;
+            } else {
+              car.x = obs.x + obs.width + 5;
+            }
+          }
+        }
+      }
+
+      // Check if car reached a door
+      for (const door of doors) {
+        if (
+          car.x + car.width / 2 > door.x &&
+          car.x + car.width / 2 < door.x + door.width &&
+          car.y < door.y + door.height
+        ) {
+          setSelectedDoor(door.color);
+          setGameState("finished");
+          return;
+        }
+      }
+
+      // Clear and draw
+      ctx.fillStyle = "#0a0a0a";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw road
+      ctx.fillStyle = "#1a1a1a";
+      ctx.fillRect(20, 0, canvas.width - 40, canvas.height);
+
+      // Draw road lines
+      ctx.strokeStyle = "#333";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([30, 20]);
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 2, canvas.height);
+      ctx.lineTo(canvas.width / 2, canvas.height - 400);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Draw lane divider at top
+      ctx.strokeStyle = "#444";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 2, 180);
+      ctx.lineTo(canvas.width / 2, canvas.height - 500);
+      ctx.stroke();
+
+      // Draw doors
+      for (const door of doors) {
+        // Door frame
+        ctx.fillStyle = door.color === "red" ? "#2d0a0a" : "#0a0a2d";
+        ctx.fillRect(door.x - 10, door.y - 10, door.width + 20, door.height + 20);
+
+        // Door glow
+        const gradient = ctx.createRadialGradient(
+          door.x + door.width / 2,
+          door.y + door.height / 2,
+          0,
+          door.x + door.width / 2,
+          door.y + door.height / 2,
+          door.width
+        );
+        gradient.addColorStop(0, door.color === "red" ? "rgba(220, 38, 38, 0.4)" : "rgba(37, 99, 235, 0.4)");
+        gradient.addColorStop(1, "transparent");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(door.x - 50, door.y - 50, door.width + 100, door.height + 100);
+
+        // Door surface
+        ctx.fillStyle = door.color === "red" ? "#dc2626" : "#2563eb";
+        ctx.fillRect(door.x, door.y, door.width, door.height);
+
+        // Door details (garage door lines)
+        ctx.strokeStyle = door.color === "red" ? "#991b1b" : "#1d4ed8";
+        ctx.lineWidth = 2;
+        for (let i = 1; i < 4; i++) {
+          ctx.beginPath();
+          ctx.moveTo(door.x, door.y + (door.height / 4) * i);
+          ctx.lineTo(door.x + door.width, door.y + (door.height / 4) * i);
+          ctx.stroke();
+        }
+
+        // Door label
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 14px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(door.label, door.x + door.width / 2, door.y + door.height + 30);
+      }
+
+      // Draw obstacles
+      for (const obs of obstacles) {
+        if (obs.type === "cone") {
+          // Traffic cone
+          ctx.fillStyle = "#f97316";
+          ctx.beginPath();
+          ctx.moveTo(obs.x + obs.width / 2, obs.y);
+          ctx.lineTo(obs.x + obs.width, obs.y + obs.height);
+          ctx.lineTo(obs.x, obs.y + obs.height);
+          ctx.closePath();
+          ctx.fill();
+          // White stripe
+          ctx.fillStyle = "#fff";
+          ctx.fillRect(obs.x + obs.width / 4, obs.y + obs.height / 2, obs.width / 2, 4);
+        } else {
+          // Barrier
+          ctx.fillStyle = "#fbbf24";
+          ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+          // Stripes
+          ctx.fillStyle = "#000";
+          for (let i = 0; i < obs.width; i += 20) {
+            ctx.fillRect(obs.x + i, obs.y, 10, obs.height);
+          }
+        }
+      }
+
+      // Draw car
+      // Car body
+      ctx.fillStyle = "#10b981";
+      ctx.beginPath();
+      ctx.roundRect(car.x, car.y, car.width, car.height, 8);
+      ctx.fill();
+
+      // Car windshield
+      ctx.fillStyle = "#065f46";
+      ctx.fillRect(car.x + 5, car.y + 10, car.width - 10, 20);
+
+      // Car headlights
+      ctx.fillStyle = "#fef3c7";
+      ctx.fillRect(car.x + 5, car.y, 8, 6);
+      ctx.fillRect(car.x + car.width - 13, car.y, 8, 6);
+
+      // Car taillights
+      ctx.fillStyle = "#ef4444";
+      ctx.fillRect(car.x + 3, car.y + car.height - 8, 10, 6);
+      ctx.fillRect(car.x + car.width - 13, car.y + car.height - 8, 10, 6);
+
+      gameLoopRef.current = requestAnimationFrame(gameLoop);
+    };
+
+    gameLoopRef.current = requestAnimationFrame(gameLoop);
+
+    return () => {
+      if (gameLoopRef.current) {
+        cancelAnimationFrame(gameLoopRef.current);
+      }
+    };
+  }, [gameState]);
+
+  // Handle finish
+  useEffect(() => {
+    if (gameState === "finished" && selectedDoor) {
+      const timer = setTimeout(() => {
+        onSelect(selectedDoor);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState, selectedDoor, onSelect]);
 
   return (
     <motion.div
-      className="fixed inset-0 z-[9999] bg-black overflow-hidden"
+      className="fixed inset-0 z-[9999] bg-black overflow-hidden flex flex-col items-center justify-center"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
       {/* Matrix Rain Background */}
-      <MatrixRain className="!opacity-60" />
+      <MatrixRain className="!opacity-30" />
 
-      {/* Dark gradient overlay for depth */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+      {/* Game Container */}
+      <div className="relative z-10 flex flex-col items-center">
+        {/* Title */}
+        <motion.h1
+          className="text-2xl md:text-3xl font-mono text-white mb-4 tracking-wider"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          CHOOSE YOUR DESTINATION
+        </motion.h1>
 
-      {/* Main Scene Container */}
-      <div className="relative w-full h-full flex flex-col items-center justify-center">
-
-        {/* Title Text */}
+        {/* Instructions */}
         <AnimatePresence>
-          {animationPhase === "idle" && (
+          {gameState === "intro" && (
             <motion.div
-              className="absolute top-16 md:top-24 text-center z-30 px-4"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
+              className="text-center mb-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             >
-              <h1 className="text-2xl md:text-4xl font-mono text-white mb-4 tracking-wider">
-                CHOOSE YOUR PATH
-              </h1>
-              <p className="text-gray-400 text-sm md:text-base font-mono max-w-xl mx-auto">
-                This is your last chance. After this, there is no turning back.
+              <p className="text-gray-400 font-mono text-sm mb-2">
+                Use <span className="text-white">← →</span> or <span className="text-white">A D</span> to steer
+              </p>
+              <p className="text-gray-500 font-mono text-xs">
+                Drive into a door to choose your experience
               </p>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Doors Container */}
-        <div className="flex items-center justify-center gap-8 md:gap-20 lg:gap-32 mt-8">
-          {/* Red Door */}
-          <motion.div
-            initial={{ opacity: 0, x: -100 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-          >
-            <Door
-              color="red"
-              label="RED DOOR"
-              sublabel="See how deep the rabbit hole goes"
-              isHovered={hoveredDoor === "red"}
-              isSelected={selectedDoor === "red"}
-              isOpening={selectedDoor === "red" && (animationPhase === "door-opening" || animationPhase === "light-flood")}
-              onHover={(hovered) => setHoveredDoor(hovered ? "red" : null)}
-              onClick={() => handleDoorClick("red")}
-              disabled={animationPhase !== "idle"}
-            />
-          </motion.div>
+        {/* Canvas */}
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            className="rounded-lg border border-gray-800"
+            style={{ maxWidth: "100%", maxHeight: "70vh" }}
+          />
 
-          {/* Blue Door */}
-          <motion.div
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-          >
-            <Door
-              color="blue"
-              label="BLUE DOOR"
-              sublabel="Wake up and believe whatever you want"
-              isHovered={hoveredDoor === "blue"}
-              isSelected={selectedDoor === "blue"}
-              isOpening={selectedDoor === "blue" && (animationPhase === "door-opening" || animationPhase === "light-flood")}
-              onHover={(hovered) => setHoveredDoor(hovered ? "blue" : null)}
-              onClick={() => handleDoorClick("blue")}
-              disabled={animationPhase !== "idle"}
-            />
-          </motion.div>
+          {/* Start overlay */}
+          <AnimatePresence>
+            {gameState === "intro" && (
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-lg"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <motion.button
+                  className="px-8 py-4 bg-green-600 hover:bg-green-500 text-white font-mono text-xl rounded-lg transition-colors"
+                  onClick={() => setGameState("playing")}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  START DRIVING
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Finish overlay */}
+          <AnimatePresence>
+            {gameState === "finished" && selectedDoor && (
+              <motion.div
+                className={`absolute inset-0 flex items-center justify-center rounded-lg ${
+                  selectedDoor === "red"
+                    ? "bg-red-600/80"
+                    : "bg-blue-600/80"
+                }`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <motion.div
+                  className="text-center"
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <p className="text-white font-mono text-2xl mb-2">
+                    {selectedDoor === "red" ? "THE REAL ME" : "PROFESSIONAL"}
+                  </p>
+                  <p className="text-white/70 font-mono text-sm">Loading...</p>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        {/* Bottom hint text */}
-        <AnimatePresence>
-          {animationPhase === "idle" && (
-            <motion.p
-              className="absolute bottom-12 text-gray-600 text-xs md:text-sm font-mono"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ delay: 1, duration: 0.5 }}
-            >
-              Click a door to enter
-            </motion.p>
-          )}
-        </AnimatePresence>
-
-        {/* Full screen transition overlay */}
-        <AnimatePresence>
-          {animationPhase === "transition" && selectedDoor && (
-            <motion.div
-              className={`absolute inset-0 z-50 ${
-                selectedDoor === "red"
-                  ? "bg-gradient-to-br from-red-600 via-red-700 to-black"
-                  : "bg-gradient-to-br from-blue-600 via-blue-700 to-black"
-              }`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8 }}
-            />
-          )}
-        </AnimatePresence>
+        {/* Mobile controls */}
+        <div className="flex gap-4 mt-4 md:hidden">
+          <button
+            className="px-8 py-4 bg-gray-800 active:bg-gray-700 text-white font-mono text-xl rounded-lg"
+            onTouchStart={() => keysPressed.current.add("arrowleft")}
+            onTouchEnd={() => keysPressed.current.delete("arrowleft")}
+          >
+            ← LEFT
+          </button>
+          <button
+            className="px-8 py-4 bg-gray-800 active:bg-gray-700 text-white font-mono text-xl rounded-lg"
+            onTouchStart={() => keysPressed.current.add("arrowright")}
+            onTouchEnd={() => keysPressed.current.delete("arrowright")}
+          >
+            RIGHT →
+          </button>
+        </div>
       </div>
     </motion.div>
   );
 }
-
-// Door Component - Cinematic Style
-function Door({
-  color,
-  label,
-  sublabel,
-  isHovered,
-  isSelected,
-  isOpening,
-  onHover,
-  onClick,
-  disabled,
-}: {
-  color: "red" | "blue";
-  label: string;
-  sublabel: string;
-  isHovered: boolean;
-  isSelected: boolean;
-  isOpening: boolean;
-  onHover: (hovered: boolean) => void;
-  onClick: () => void;
-  disabled: boolean;
-}) {
-  const isRed = color === "red";
-
-  // Colors
-  const frameColor = isRed ? "#1a0a0a" : "#0a0a1a";
-  const doorColor = isRed ? "#2d0a0a" : "#0a0a2d";
-  const glowColor = isRed ? "rgba(220, 38, 38, 0.6)" : "rgba(37, 99, 235, 0.6)";
-  const lightColor = isRed ? "#fca5a5" : "#93c5fd";
-  const accentColor = isRed ? "#dc2626" : "#2563eb";
-  const textColor = isRed ? "text-red-500" : "text-blue-500";
-
-  return (
-    <motion.button
-      className="relative cursor-pointer group focus:outline-none"
-      onMouseEnter={() => onHover(true)}
-      onMouseLeave={() => onHover(false)}
-      onClick={onClick}
-      disabled={disabled}
-      animate={{
-        scale: isHovered && !isOpening ? 1.02 : 1,
-      }}
-      transition={{ duration: 0.3 }}
-      whileTap={{ scale: 0.98 }}
-    >
-      {/* Outer glow */}
-      <motion.div
-        className="absolute -inset-4 md:-inset-6 rounded-lg blur-2xl"
-        style={{ backgroundColor: glowColor }}
-        animate={{
-          opacity: isHovered || isSelected ? 0.8 : 0.2,
-          scale: isHovered ? 1.1 : 1,
-        }}
-        transition={{ duration: 0.4 }}
-      />
-
-      {/* Door Container */}
-      <div className="relative">
-        {/* Door Frame */}
-        <div
-          className="relative w-36 h-56 md:w-48 md:h-72 lg:w-56 lg:h-80 rounded-t-xl overflow-hidden"
-          style={{
-            backgroundColor: frameColor,
-            boxShadow: isHovered || isSelected
-              ? `0 0 60px ${glowColor}, inset 0 0 30px rgba(0,0,0,0.8)`
-              : `inset 0 0 30px rgba(0,0,0,0.8)`,
-          }}
-        >
-          {/* Door Surface */}
-          <div
-            className="absolute inset-2 md:inset-3 rounded-t-lg transition-all duration-300"
-            style={{
-              backgroundColor: doorColor,
-              border: `2px solid ${isHovered || isSelected ? accentColor : '#333'}`,
-            }}
-          >
-            {/* Door Panels */}
-            <div className="absolute inset-3 md:inset-4 grid grid-rows-3 gap-2 md:gap-3">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="rounded border transition-colors duration-300"
-                  style={{
-                    borderColor: isHovered || isSelected ? accentColor : '#444',
-                    backgroundColor: isHovered || isSelected
-                      ? `${accentColor}10`
-                      : 'transparent',
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* Door Handle */}
-            <div
-              className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 w-2 md:w-3 h-6 md:h-8 rounded-full transition-all duration-300"
-              style={{
-                backgroundColor: isHovered || isSelected ? lightColor : '#666',
-                boxShadow: isHovered || isSelected
-                  ? `0 0 15px ${glowColor}`
-                  : 'none',
-              }}
-            />
-
-            {/* Keyhole */}
-            <div
-              className="absolute right-3 md:right-4 top-1/2 translate-y-4 md:translate-y-6 w-1 h-3 md:h-4 rounded-full transition-colors duration-300"
-              style={{
-                backgroundColor: isHovered || isSelected ? accentColor : '#555',
-              }}
-            />
-          </div>
-
-          {/* Light coming through when opening */}
-          <AnimatePresence>
-            {isOpening && (
-              <motion.div
-                className="absolute inset-0"
-                style={{ backgroundColor: lightColor }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: [0, 0.3, 0.8, 1] }}
-                transition={{ duration: 1.2, ease: "easeIn" }}
-              />
-            )}
-          </AnimatePresence>
-
-          {/* Light rays when opening */}
-          <AnimatePresence>
-            {isOpening && (
-              <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-                {[...Array(7)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute w-2 md:w-4"
-                    style={{
-                      height: '200%',
-                      backgroundColor: lightColor,
-                      transformOrigin: "center center",
-                      rotate: `${(i - 3) * 12}deg`,
-                      filter: "blur(8px)",
-                    }}
-                    initial={{ scaleY: 0, opacity: 0 }}
-                    animate={{ scaleY: 1, opacity: [0, 0.4, 0.7] }}
-                    transition={{ duration: 1, delay: i * 0.05, ease: "easeOut" }}
-                  />
-                ))}
-              </div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Floor reflection */}
-        <div
-          className="w-full h-4 md:h-6 rounded-b-lg opacity-50"
-          style={{
-            background: `linear-gradient(to bottom, ${frameColor}, transparent)`,
-          }}
-        />
-
-        {/* Label */}
-        <motion.div
-          className="mt-4 md:mt-6 text-center"
-          animate={{
-            y: isHovered ? -2 : 0,
-          }}
-          transition={{ duration: 0.2 }}
-        >
-          <p className={`text-lg md:text-xl font-mono font-bold tracking-widest ${textColor}`}>
-            {label}
-          </p>
-          <p className="text-gray-500 text-xs md:text-sm font-mono mt-1 max-w-32 md:max-w-40 mx-auto">
-            {sublabel}
-          </p>
-        </motion.div>
-      </div>
-    </motion.button>
-  );
-}
-
