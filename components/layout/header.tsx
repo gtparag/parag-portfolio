@@ -10,6 +10,12 @@ export function Header() {
   const { mode } = useMode();
   const isRedMode = mode === "red";
 
+  const handleBackToMenu = () => {
+    sessionStorage.removeItem("visitorType");
+    sessionStorage.removeItem("pillChoice");
+    window.location.reload();
+  };
+
   return (
     <motion.header
       initial={{ y: -10, opacity: 0 }}
@@ -19,18 +25,32 @@ export function Header() {
     >
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-12">
-          <Link href="/" className="group">
-            <span
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleBackToMenu}
               className={cn(
-                "text-sm font-bold transition-all",
+                "text-xs transition-all hover:opacity-80",
                 isRedMode
-                  ? "text-[var(--matrix-red)] text-glow-red"
-                  : "text-[var(--matrix-green)] text-glow"
+                  ? "text-[var(--matrix-red-dim)] hover:text-[var(--matrix-red)]"
+                  : "text-[var(--matrix-green-dim)] hover:text-[var(--matrix-green)]"
               )}
+              title="Back to menu"
             >
-              {">"} pa_
-            </span>
-          </Link>
+              {"<"} EXIT
+            </button>
+            <Link href="/" className="group">
+              <span
+                className={cn(
+                  "text-sm font-bold transition-all",
+                  isRedMode
+                    ? "text-[var(--matrix-red)] text-glow-red"
+                    : "text-[var(--matrix-green)] text-glow"
+                )}
+              >
+                {">"} pa_
+              </span>
+            </Link>
+          </div>
 
           <div className="flex items-center gap-3">
             <span className="text-sm text-[var(--text-muted)]">

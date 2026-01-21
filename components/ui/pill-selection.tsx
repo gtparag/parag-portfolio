@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { MatrixRain } from "@/components/ui/matrix-rain";
 
 type DoorChoice = "red" | "blue" | null;
 
@@ -35,10 +36,8 @@ export function PillSelection({ onSelect }: PillSelectionProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      {/* Matrix Rain Background - More Visible */}
-      <div className="absolute inset-0">
-        <MatrixRainBackground />
-      </div>
+      {/* Matrix Rain Background */}
+      <MatrixRain className="!opacity-60" />
 
       {/* Dark gradient overlay for depth */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
@@ -320,57 +319,3 @@ function Door({
   );
 }
 
-// Matrix Rain Background - Vertical Falling Characters
-function MatrixRainBackground() {
-  const columns = 40;
-
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      {[...Array(columns)].map((_, colIndex) => (
-        <div
-          key={colIndex}
-          className="absolute top-0 flex flex-col"
-          style={{
-            left: `${(colIndex / columns) * 100}%`,
-          }}
-        >
-          {/* Multiple falling streams per column for density */}
-          {[0, 1, 2].map((streamIndex) => (
-            <motion.div
-              key={streamIndex}
-              className="absolute flex flex-col items-center"
-              initial={{ y: -600 - streamIndex * 400 }}
-              animate={{ y: "100vh" }}
-              transition={{
-                duration: 6 + Math.random() * 4,
-                repeat: Infinity,
-                delay: streamIndex * 2 + Math.random() * 3,
-                ease: "linear",
-              }}
-            >
-              {[...Array(20)].map((_, charIndex) => {
-                const isHead = charIndex === 19;
-                const brightness = isHead ? 1 : 0.3 + (charIndex / 20) * 0.5;
-                return (
-                  <span
-                    key={charIndex}
-                    className="text-sm md:text-base font-mono leading-tight"
-                    style={{
-                      color: isHead ? '#FFFFFF' : '#00FF41',
-                      textShadow: isHead
-                        ? '0 0 10px #FFFFFF, 0 0 20px #00FF41'
-                        : '0 0 8px #00FF41',
-                      opacity: brightness,
-                    }}
-                  >
-                    {String.fromCharCode(0x30A0 + Math.floor(Math.random() * 96))}
-                  </span>
-                );
-              })}
-            </motion.div>
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}
