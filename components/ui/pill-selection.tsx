@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Physics, useBox, useSphere, usePlane } from "@react-three/cannon";
+import { Instances, Instance } from "@react-three/drei";
 import * as THREE from "three";
 
 interface PillSelectionProps {
   onSelect: (choice: "red" | "blue") => void;
 }
 
-// Simple car with direct velocity control
-function Car({
+// Toy-like truck - cute and stylized like Bruno Simon's
+function Truck({
   onPositionUpdate,
   carRef,
 }: {
@@ -20,73 +21,46 @@ function Car({
 }) {
   const meshRef = useRef<THREE.Group>(null);
   const yRotation = useRef(0);
+  const wheelRefs = useRef<THREE.Mesh[]>([]);
 
   const [, api] = useBox(
     () => ({
       mass: 20,
-      position: [0, 0.5, 0],
-      args: [1.4, 0.6, 2.4],
-      angularFactor: [0, 1, 0], // Only allow Y rotation
+      position: [0, 0.6, 0],
+      args: [1.4, 0.8, 2.2],
+      angularFactor: [0, 1, 0],
       linearDamping: 0.9,
       angularDamping: 0.99,
       allowSleep: false,
-      fixedRotation: false,
     }),
     meshRef
   );
 
   const controls = useRef({ forward: false, backward: false, left: false, right: false });
-  const position = useRef([0, 0.5, 0]);
+  const position = useRef([0, 0.6, 0]);
 
-  // Subscribe to position
   useEffect(() => {
     const unsubPos = api.position.subscribe((p) => (position.current = p));
     return () => unsubPos();
   }, [api]);
 
-  // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.code) {
-        case "KeyW":
-        case "ArrowUp":
-          controls.current.forward = true;
-          break;
-        case "KeyS":
-        case "ArrowDown":
-          controls.current.backward = true;
-          break;
-        case "KeyA":
-        case "ArrowLeft":
-          controls.current.left = true;
-          break;
-        case "KeyD":
-        case "ArrowRight":
-          controls.current.right = true;
-          break;
+        case "KeyW": case "ArrowUp": controls.current.forward = true; break;
+        case "KeyS": case "ArrowDown": controls.current.backward = true; break;
+        case "KeyA": case "ArrowLeft": controls.current.left = true; break;
+        case "KeyD": case "ArrowRight": controls.current.right = true; break;
       }
     };
     const handleKeyUp = (e: KeyboardEvent) => {
       switch (e.code) {
-        case "KeyW":
-        case "ArrowUp":
-          controls.current.forward = false;
-          break;
-        case "KeyS":
-        case "ArrowDown":
-          controls.current.backward = false;
-          break;
-        case "KeyA":
-        case "ArrowLeft":
-          controls.current.left = false;
-          break;
-        case "KeyD":
-        case "ArrowRight":
-          controls.current.right = false;
-          break;
+        case "KeyW": case "ArrowUp": controls.current.forward = false; break;
+        case "KeyS": case "ArrowDown": controls.current.backward = false; break;
+        case "KeyA": case "ArrowLeft": controls.current.left = false; break;
+        case "KeyD": case "ArrowRight": controls.current.right = false; break;
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
     return () => {
@@ -95,122 +69,205 @@ function Car({
     };
   }, []);
 
-  // Movement using velocity
   useFrame((_, delta) => {
     const { forward, backward, left, right } = controls.current;
-
-    // Turning
-    const turnSpeed = 2.5;
+    const turnSpeed = 3;
     if (left) yRotation.current += turnSpeed * delta;
     if (right) yRotation.current -= turnSpeed * delta;
 
-    // Set rotation directly on the mesh (visual) and sync physics
-    if (meshRef.current) {
-      meshRef.current.rotation.y = yRotation.current;
-    }
+    if (meshRef.current) meshRef.current.rotation.y = yRotation.current;
     api.quaternion.set(0, Math.sin(yRotation.current / 2), 0, Math.cos(yRotation.current / 2));
 
-    // Calculate velocity based on rotation
-    const speed = 12;
-    let vx = 0;
-    let vz = 0;
+    const speed = 14;
+    let vx = 0, vz = 0;
+    if (forward) { vx = -Math.sin(yRotation.current) * speed; vz = -Math.cos(yRotation.current) * speed; }
+    if (backward) { vx = Math.sin(yRotation.current) * speed * 0.5; vz = Math.cos(yRotation.current) * speed * 0.5; }
+    if (forward || backward) api.velocity.set(vx, 0, vz);
 
-    if (forward) {
-      vx = -Math.sin(yRotation.current) * speed;
-      vz = -Math.cos(yRotation.current) * speed;
-    }
-    if (backward) {
-      vx = Math.sin(yRotation.current) * speed * 0.5;
-      vz = Math.cos(yRotation.current) * speed * 0.5;
-    }
+    // Animate wheels
+    const wheelSpeed = (forward ? 1 : backward ? -0.5 : 0) * 10 * delta;
+    wheelRefs.current.forEach(wheel => {
+      if (wheel) wheel.rotation.x += wheelSpeed;
+    });
 
-    // Set velocity directly
-    if (forward || backward) {
-      api.velocity.set(vx, 0, vz);
-    }
-
-    // Update position ref for camera
     const pos = new THREE.Vector3(position.current[0], position.current[1], position.current[2]);
     carRef.current.copy(pos);
     onPositionUpdate(pos);
   });
 
+  // Vibrant toy colors
+  const bodyColor = "#ff6b6b";
+  const bodyColorDark = "#e55555";
+  const accentColor = "#ffd93d";
+  const wheelColor = "#2d3436";
+  const rimColor = "#dfe6e9";
+
   return (
     <group ref={meshRef}>
-      {/* Car body */}
+      {/* Main body - rounded look using multiple parts */}
       <mesh position={[0, 0.1, 0]} castShadow>
-        <boxGeometry args={[1.4, 0.5, 2.4]} />
-        <meshStandardMaterial color="#dc2626" roughness={0.3} metalness={0.5} />
+        <boxGeometry args={[1.3, 0.5, 2]} />
+        <meshStandardMaterial color={bodyColor} />
       </mesh>
 
-      {/* Rounded front/back */}
-      <mesh position={[0, 0.1, 1.1]} castShadow>
-        <sphereGeometry args={[0.5, 12, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshStandardMaterial color="#dc2626" roughness={0.3} metalness={0.5} />
+      {/* Body top curve simulation */}
+      <mesh position={[0, 0.35, 0.3]} castShadow>
+        <boxGeometry args={[1.2, 0.15, 1.2]} />
+        <meshStandardMaterial color={bodyColor} />
       </mesh>
-      <mesh position={[0, 0.1, -1.1]} rotation={[Math.PI, 0, 0]} castShadow>
-        <sphereGeometry args={[0.5, 12, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshStandardMaterial color="#dc2626" roughness={0.3} metalness={0.5} />
+
+      {/* Hood - front */}
+      <mesh position={[0, 0.25, 0.75]} castShadow>
+        <boxGeometry args={[1.1, 0.35, 0.5]} />
+        <meshStandardMaterial color={bodyColor} />
+      </mesh>
+
+      {/* Hood rounded top */}
+      <mesh position={[0, 0.45, 0.75]} castShadow>
+        <sphereGeometry args={[0.3, 8, 8]} />
+        <meshStandardMaterial color={bodyColor} />
       </mesh>
 
       {/* Cabin */}
       <mesh position={[0, 0.55, -0.2]} castShadow>
-        <boxGeometry args={[1.2, 0.45, 1.4]} />
-        <meshStandardMaterial color="#b91c1c" roughness={0.3} metalness={0.5} />
+        <boxGeometry args={[1.1, 0.5, 0.9]} />
+        <meshStandardMaterial color={bodyColor} />
       </mesh>
 
-      {/* Windows */}
-      <mesh position={[0, 0.55, 0.45]} rotation={[-0.3, 0, 0]}>
-        <boxGeometry args={[1.1, 0.4, 0.05]} />
-        <meshStandardMaterial color="#60a5fa" transparent opacity={0.8} />
+      {/* Cabin roof - rounded */}
+      <mesh position={[0, 0.8, -0.2]} castShadow>
+        <boxGeometry args={[1.0, 0.12, 0.8]} />
+        <meshStandardMaterial color={bodyColorDark} />
       </mesh>
 
-      {/* Wheels */}
-      {[
-        [-0.7, -0.15, 0.8],
-        [0.7, -0.15, 0.8],
-        [-0.7, -0.15, -0.8],
-        [0.7, -0.15, -0.8],
-      ].map((pos, i) => (
-        <mesh key={i} position={pos as [number, number, number]} rotation={[0, 0, Math.PI / 2]} castShadow>
-          <cylinderGeometry args={[0.35, 0.35, 0.25, 16]} />
-          <meshStandardMaterial color="#1f2937" roughness={0.9} />
+      {/* Windshield */}
+      <mesh position={[0, 0.6, 0.22]} rotation={[-0.4, 0, 0]} castShadow>
+        <boxGeometry args={[0.9, 0.4, 0.08]} />
+        <meshStandardMaterial color="#74b9ff" transparent opacity={0.7} />
+      </mesh>
+
+      {/* Side windows */}
+      {[-0.56, 0.56].map((x, i) => (
+        <mesh key={i} position={[x, 0.55, -0.2]} castShadow>
+          <boxGeometry args={[0.05, 0.35, 0.6]} />
+          <meshStandardMaterial color="#74b9ff" transparent opacity={0.6} />
         </mesh>
       ))}
 
-      {/* Headlights */}
-      <mesh position={[-0.45, 0.1, 1.2]}>
-        <sphereGeometry args={[0.15, 8, 8]} />
-        <meshStandardMaterial color="#fef3c7" emissive="#fef3c7" emissiveIntensity={1} />
+      {/* Rear section */}
+      <mesh position={[0, 0.15, -0.85]} castShadow>
+        <boxGeometry args={[1.2, 0.4, 0.4]} />
+        <meshStandardMaterial color={bodyColorDark} />
       </mesh>
-      <mesh position={[0.45, 0.1, 1.2]}>
-        <sphereGeometry args={[0.15, 8, 8]} />
-        <meshStandardMaterial color="#fef3c7" emissive="#fef3c7" emissiveIntensity={1} />
+
+      {/* Headlights - big and cute */}
+      {[-0.4, 0.4].map((x, i) => (
+        <group key={i}>
+          <mesh position={[x, 0.2, 1.02]} castShadow>
+            <sphereGeometry args={[0.15, 12, 12]} />
+            <meshStandardMaterial color={accentColor} emissive={accentColor} emissiveIntensity={0.8} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Grille - simple cute style */}
+      <mesh position={[0, 0.05, 1.01]} castShadow>
+        <boxGeometry args={[0.5, 0.25, 0.05]} />
+        <meshStandardMaterial color="#636e72" />
+      </mesh>
+
+      {/* Taillights */}
+      {[-0.45, 0.45].map((x, i) => (
+        <mesh key={i} position={[x, 0.2, -1.03]} castShadow>
+          <sphereGeometry args={[0.1, 8, 8]} />
+          <meshStandardMaterial color="#d63031" emissive="#d63031" emissiveIntensity={0.5} />
+        </mesh>
+      ))}
+
+      {/* Bumpers */}
+      <mesh position={[0, -0.1, 1.05]} castShadow>
+        <boxGeometry args={[1.1, 0.18, 0.12]} />
+        <meshStandardMaterial color="#636e72" />
+      </mesh>
+      <mesh position={[0, -0.1, -1.05]} castShadow>
+        <boxGeometry args={[1.1, 0.18, 0.12]} />
+        <meshStandardMaterial color="#636e72" />
+      </mesh>
+
+      {/* Wheels - chunky toy style */}
+      {[
+        { pos: [-0.7, -0.15, 0.65], idx: 0 },
+        { pos: [0.7, -0.15, 0.65], idx: 1 },
+        { pos: [-0.7, -0.15, -0.6], idx: 2 },
+        { pos: [0.7, -0.15, -0.6], idx: 3 },
+      ].map(({ pos, idx }) => (
+        <group key={idx} position={pos as [number, number, number]}>
+          {/* Tire - chunky */}
+          <mesh
+            rotation={[0, 0, Math.PI / 2]}
+            castShadow
+            ref={(el) => { if (el) wheelRefs.current[idx] = el; }}
+          >
+            <cylinderGeometry args={[0.35, 0.35, 0.28, 16]} />
+            <meshStandardMaterial color={wheelColor} />
+          </mesh>
+          {/* Rim */}
+          <mesh rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.18, 0.18, 0.3, 12]} />
+            <meshStandardMaterial color={rimColor} />
+          </mesh>
+          {/* Hub cap */}
+          <mesh rotation={[0, 0, Math.PI / 2]} position={[pos[0] > 0 ? 0.15 : -0.15, 0, 0]}>
+            <cylinderGeometry args={[0.08, 0.08, 0.05, 8]} />
+            <meshStandardMaterial color={accentColor} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Fenders - rounded */}
+      {[-0.65, 0.65].map((x, i) => (
+        <group key={i}>
+          <mesh position={[x, 0.05, 0.65]} castShadow>
+            <boxGeometry args={[0.15, 0.3, 0.5]} />
+            <meshStandardMaterial color={bodyColorDark} />
+          </mesh>
+          <mesh position={[x, 0.05, -0.6]} castShadow>
+            <boxGeometry args={[0.15, 0.3, 0.5]} />
+            <meshStandardMaterial color={bodyColorDark} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Antenna - cute detail */}
+      <mesh position={[0.3, 1.1, -0.3]} castShadow>
+        <cylinderGeometry args={[0.02, 0.02, 0.5, 6]} />
+        <meshStandardMaterial color="#2d3436" />
+      </mesh>
+      <mesh position={[0.3, 1.35, -0.3]} castShadow>
+        <sphereGeometry args={[0.05, 8, 8]} />
+        <meshStandardMaterial color="#d63031" />
       </mesh>
     </group>
   );
 }
 
-// Camera following car from isometric view
+// Camera following car - isometric-ish view
 function FollowCamera({ target }: { target: React.MutableRefObject<THREE.Vector3> }) {
   const { camera } = useThree();
-  const smoothPos = useRef(new THREE.Vector3(0, 25, -20));
+  const smoothPos = useRef(new THREE.Vector3(0, 18, -14));
 
   useFrame(() => {
-    // Isometric-style camera offset
-    const offset = new THREE.Vector3(0, 22, -18);
+    const offset = new THREE.Vector3(0, 15, -12);
     const targetPos = target.current.clone().add(offset);
-
-    // Smooth follow
     smoothPos.current.lerp(targetPos, 0.08);
     camera.position.copy(smoothPos.current);
-    camera.lookAt(target.current.x, 0, target.current.z);
+    camera.lookAt(target.current.x, 0, target.current.z + 3);
   });
 
   return null;
 }
 
-// Ground
+// Ground - stylized cartoon terrain
 function Ground() {
   const [ref] = usePlane(
     () => ({
@@ -222,309 +279,467 @@ function Ground() {
   );
 
   return (
-    <mesh ref={ref} receiveShadow>
-      <planeGeometry args={[200, 200]} />
-      <meshStandardMaterial color="#4ade80" />
-    </mesh>
+    <>
+      {/* Main ground - soft warm sand color */}
+      <mesh ref={ref} receiveShadow>
+        <planeGeometry args={[200, 200]} />
+        <meshStandardMaterial color="#dfe6e9" />
+      </mesh>
+
+      {/* Central plaza - slightly different tone */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 5]} receiveShadow>
+        <circleGeometry args={[18, 32]} />
+        <meshStandardMaterial color="#ffeaa7" />
+      </mesh>
+
+      {/* Path from plaza to doors */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-10, 0.01, 22]} receiveShadow>
+        <planeGeometry args={[5, 20]} />
+        <meshStandardMaterial color="#fab1a0" />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[10, 0.01, 22]} receiveShadow>
+        <planeGeometry args={[5, 20]} />
+        <meshStandardMaterial color="#74b9ff" />
+      </mesh>
+
+      {/* Grass patches - multiple circular areas */}
+      {[
+        [-25, 0], [25, 0], [-20, 25], [20, -20], [0, -25], [-30, -15], [30, 15],
+        [-15, 30], [15, -30], [35, -5], [-35, 5]
+      ].map(([x, z], i) => (
+        <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[x, 0.02, z]} receiveShadow>
+          <circleGeometry args={[8 + Math.random() * 4, 24]} />
+          <meshStandardMaterial color="#55efc4" />
+        </mesh>
+      ))}
+    </>
   );
 }
 
-// Bumpable colored block
-function Block({
-  position,
-  size = [1.5, 1.5, 1.5],
-  color,
-}: {
-  position: [number, number, number];
-  size?: [number, number, number];
-  color: string;
-}) {
-  const [ref] = useBox(
-    () => ({
-      mass: 8,
-      position: [position[0], position[1] + size[1] / 2, position[2]],
-      args: size,
-    }),
-    useRef<THREE.Mesh>(null)
-  );
+// Simple stylized grass tufts
+function GrassTuft({ position }: { position: [number, number, number] }) {
+  const color = useMemo(() => {
+    const colors = ["#00b894", "#00cec9", "#55efc4"];
+    return colors[Math.floor(Math.random() * colors.length)];
+  }, []);
 
-  return (
-    <mesh ref={ref} castShadow receiveShadow>
-      <boxGeometry args={size} />
-      <meshStandardMaterial color={color} roughness={0.4} />
-    </mesh>
-  );
-}
-
-// Bumpable sphere/ball
-function Ball({
-  position,
-  radius = 0.8,
-  color,
-}: {
-  position: [number, number, number];
-  radius?: number;
-  color: string;
-}) {
-  const [ref] = useSphere(
-    () => ({
-      mass: 5,
-      position: [position[0], position[1] + radius, position[2]],
-      args: [radius],
-    }),
-    useRef<THREE.Mesh>(null)
-  );
-
-  return (
-    <mesh ref={ref} castShadow>
-      <sphereGeometry args={[radius, 16, 16]} />
-      <meshStandardMaterial color={color} roughness={0.3} />
-    </mesh>
-  );
-}
-
-// Static tree/decoration
-function Tree({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      {/* Trunk */}
-      <mesh position={[0, 1, 0]} castShadow>
-        <cylinderGeometry args={[0.3, 0.4, 2, 8]} />
-        <meshStandardMaterial color="#92400e" roughness={0.9} />
+      {/* Simple cone grass blades */}
+      {[0, 1, 2, 3, 4].map((i) => {
+        const angle = (i / 5) * Math.PI * 2 + Math.random() * 0.5;
+        const dist = 0.1 + Math.random() * 0.15;
+        const height = 0.3 + Math.random() * 0.3;
+        return (
+          <mesh
+            key={i}
+            position={[Math.cos(angle) * dist, height / 2, Math.sin(angle) * dist]}
+            rotation={[(Math.random() - 0.5) * 0.3, 0, (Math.random() - 0.5) * 0.3]}
+          >
+            <coneGeometry args={[0.06, height, 4]} />
+            <meshStandardMaterial color={color} flatShading />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
+// Cartoon puffball tree - like Bruno Simon's style
+function FluffyTree({ position, color = "green", scale = 1 }: { position: [number, number, number]; color?: string; scale?: number }) {
+  const foliageColors: Record<string, string> = {
+    green: "#00b894",
+    lightgreen: "#55efc4",
+    pink: "#fd79a8",
+    orange: "#e17055",
+    yellow: "#fdcb6e",
+    purple: "#a29bfe",
+  };
+
+  const mainColor = foliageColors[color] || foliageColors.green;
+
+  // Create distinct puffball clusters
+  const foliageParts = useMemo(() => {
+    const parts = [];
+    // Large main puffs
+    const clusters = [
+      { pos: [0, 2.8, 0], size: 1.5 },
+      { pos: [0.9, 2.4, 0.6], size: 1.1 },
+      { pos: [-0.8, 2.5, 0.5], size: 1.0 },
+      { pos: [0.5, 3.3, -0.4], size: 0.95 },
+      { pos: [-0.6, 3.1, -0.5], size: 0.9 },
+      { pos: [0.2, 3.6, 0.3], size: 0.85 },
+      { pos: [-0.3, 2.2, 0.8], size: 0.8 },
+      { pos: [0.7, 2.9, -0.6], size: 0.75 },
+    ];
+    for (const cluster of clusters) {
+      parts.push({
+        position: cluster.pos as [number, number, number],
+        size: cluster.size,
+      });
+    }
+    return parts;
+  }, []);
+
+  return (
+    <group position={position} scale={scale}>
+      {/* Trunk - tapered and slightly curved look */}
+      <mesh position={[0, 0.9, 0]} castShadow>
+        <cylinderGeometry args={[0.15, 0.3, 1.8, 8]} />
+        <meshStandardMaterial color="#b97a57" />
       </mesh>
-      {/* Foliage */}
-      <mesh position={[0, 2.8, 0]} castShadow>
-        <coneGeometry args={[1.5, 3, 8]} />
-        <meshStandardMaterial color="#166534" roughness={0.8} />
+      {/* Trunk detail */}
+      <mesh position={[0.08, 0.5, 0.08]} castShadow>
+        <cylinderGeometry args={[0.05, 0.08, 0.5, 6]} />
+        <meshStandardMaterial color="#a0694b" />
       </mesh>
-      <mesh position={[0, 3.8, 0]} castShadow>
-        <coneGeometry args={[1.2, 2.5, 8]} />
-        <meshStandardMaterial color="#15803d" roughness={0.8} />
+
+      {/* Puffball foliage - soft shaded spheres */}
+      {foliageParts.map((part, i) => (
+        <mesh key={i} position={part.position} castShadow>
+          <sphereGeometry args={[part.size, 12, 12]} />
+          <meshStandardMaterial color={mainColor} flatShading />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+// Small bush/shrub
+function Bush({ position, color = "#00b894" }: { position: [number, number, number]; color?: string }) {
+  return (
+    <group position={position}>
+      <mesh position={[0, 0.4, 0]} castShadow>
+        <sphereGeometry args={[0.6, 8, 8]} />
+        <meshStandardMaterial color={color} flatShading />
+      </mesh>
+      <mesh position={[0.35, 0.3, 0.2]} castShadow>
+        <sphereGeometry args={[0.4, 8, 8]} />
+        <meshStandardMaterial color={color} flatShading />
+      </mesh>
+      <mesh position={[-0.3, 0.35, -0.15]} castShadow>
+        <sphereGeometry args={[0.35, 8, 8]} />
+        <meshStandardMaterial color={color} flatShading />
       </mesh>
     </group>
   );
 }
 
-// Static collision boundary for tree
+// Tree collider
 function TreeCollider({ position }: { position: [number, number, number] }) {
   const [ref] = useBox(
-    () => ({
-      type: "Static",
-      position: [position[0], 1.5, position[2]],
-      args: [1, 3, 1],
-    }),
+    () => ({ type: "Static", position: [position[0], 1.5, position[2]], args: [1, 3, 1] }),
     useRef<THREE.Mesh>(null)
   );
   return <mesh ref={ref} visible={false} />;
 }
 
-// Garage door with trigger zone
-function GarageDoor({
-  position,
-  rotation = 0,
-  color,
-  label,
-  carRef,
-  onEnter,
-}: {
-  position: [number, number, number];
-  rotation?: number;
-  color: "red" | "blue";
-  label: string;
-  carRef: React.MutableRefObject<THREE.Vector3>;
-  onEnter: () => void;
+// 3D Text - colorful block letters
+function NameText3D({ position }: { position: [number, number, number] }) {
+  const text = "PARAG";
+  const text2 = "AMBILDHUKE";
+
+  const Letter = ({ char, pos, color }: { char: string; pos: [number, number, number]; color: string }) => {
+    if (char === " ") return null;
+    return (
+      <group position={pos}>
+        {/* Main block */}
+        <mesh castShadow>
+          <boxGeometry args={[1.4, 2, 0.8]} />
+          <meshStandardMaterial color={color} flatShading />
+        </mesh>
+        {/* Top bevel */}
+        <mesh position={[0, 1.1, 0]} castShadow>
+          <boxGeometry args={[1.2, 0.2, 0.6]} />
+          <meshStandardMaterial color={color} flatShading />
+        </mesh>
+      </group>
+    );
+  };
+
+  const colors1 = ["#ff6b6b", "#ffd93d", "#6bcb77", "#4d96ff", "#ff6b6b"];
+  const colors2 = ["#4d96ff", "#6bcb77", "#ffd93d", "#ff6b6b", "#4d96ff", "#6bcb77", "#ffd93d", "#ff6b6b", "#4d96ff", "#6bcb77"];
+
+  return (
+    <group position={position} rotation={[0, 0.2, 0]}>
+      {/* PARAG */}
+      {text.split("").map((char, i) => (
+        <Letter key={`p-${i}`} char={char} pos={[i * 1.7 - 3.4, 1, 0]} color={colors1[i]} />
+      ))}
+      {/* AMBILDHUKE - second row */}
+      {text2.split("").map((char, i) => (
+        <Letter key={`a-${i}`} char={char} pos={[i * 1.7 - 7.5, 1, 3]} color={colors2[i]} />
+      ))}
+    </group>
+  );
+}
+
+// Bowling pin - fun bumpable object
+function BowlingPin({ position }: { position: [number, number, number] }) {
+  const [ref] = useBox(
+    () => ({ mass: 2, position: [position[0], position[1] + 0.6, position[2]], args: [0.3, 1.2, 0.3] }),
+    useRef<THREE.Group>(null)
+  );
+
+  return (
+    <group ref={ref}>
+      {/* Body */}
+      <mesh position={[0, -0.2, 0]} castShadow>
+        <cylinderGeometry args={[0.2, 0.25, 0.6, 12]} />
+        <meshStandardMaterial color="#ffeaa7" />
+      </mesh>
+      {/* Neck */}
+      <mesh position={[0, 0.2, 0]} castShadow>
+        <cylinderGeometry args={[0.1, 0.18, 0.3, 12]} />
+        <meshStandardMaterial color="#ffeaa7" />
+      </mesh>
+      {/* Head */}
+      <mesh position={[0, 0.45, 0]} castShadow>
+        <sphereGeometry args={[0.15, 12, 12]} />
+        <meshStandardMaterial color="#ffeaa7" />
+      </mesh>
+      {/* Stripe */}
+      <mesh position={[0, -0.1, 0]} castShadow>
+        <cylinderGeometry args={[0.21, 0.21, 0.15, 12]} />
+        <meshStandardMaterial color="#d63031" />
+      </mesh>
+    </group>
+  );
+}
+
+// Rock obstacle
+function Rock({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) {
+  const [ref] = useSphere(
+    () => ({ mass: 50, position: [position[0], position[1] + 0.4 * scale, position[2]], args: [0.5 * scale] }),
+    useRef<THREE.Mesh>(null)
+  );
+
+  const color = useMemo(() => {
+    const colors = ["#636e72", "#b2bec3", "#dfe6e9"];
+    return colors[Math.floor(Math.random() * colors.length)];
+  }, []);
+
+  return (
+    <mesh ref={ref} castShadow scale={scale}>
+      <dodecahedronGeometry args={[0.6, 0]} />
+      <meshStandardMaterial color={color} flatShading />
+    </mesh>
+  );
+}
+
+// Balloon - decorative
+function Balloon({ position, color }: { position: [number, number, number]; color: string }) {
+  return (
+    <group position={position}>
+      {/* String */}
+      <mesh position={[0, 1.5, 0]}>
+        <cylinderGeometry args={[0.015, 0.015, 3, 6]} />
+        <meshStandardMaterial color="#2d3436" />
+      </mesh>
+      {/* Balloon */}
+      <mesh position={[0, 3.3, 0]} castShadow>
+        <sphereGeometry args={[0.6, 12, 12]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+      <mesh position={[0, 2.65, 0]} castShadow>
+        <coneGeometry args={[0.15, 0.2, 8]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+    </group>
+  );
+}
+
+// Bumpable crate - colorful toy style
+function Crate({ position, color = "#fdcb6e" }: { position: [number, number, number]; color?: string }) {
+  const [ref] = useBox(
+    () => ({ mass: 8, position: [position[0], position[1] + 0.5, position[2]], args: [0.9, 0.9, 0.9] }),
+    useRef<THREE.Mesh>(null)
+  );
+
+  return (
+    <mesh ref={ref} castShadow>
+      <boxGeometry args={[0.9, 0.9, 0.9]} />
+      <meshStandardMaterial color={color} flatShading />
+    </mesh>
+  );
+}
+
+// Portal door - colorful and inviting
+function PortalDoor({ position, rotation = 0, color, carRef, onEnter, label }: {
+  position: [number, number, number]; rotation?: number; color: "red" | "blue";
+  carRef: React.MutableRefObject<THREE.Vector3>; onEnter: () => void; label: string;
 }) {
-  const doorColor = color === "red" ? "#dc2626" : "#2563eb";
-  const frameColor = color === "red" ? "#991b1b" : "#1e40af";
+  const mainColor = color === "red" ? "#ff6b6b" : "#74b9ff";
+  const darkColor = color === "red" ? "#d63031" : "#0984e3";
   const entered = useRef(false);
 
-  // Check distance to car for trigger
   useFrame(() => {
     if (entered.current) return;
-    const doorPos = new THREE.Vector3(position[0], 0, position[2]);
-    const dist = carRef.current.distanceTo(doorPos);
-    if (dist < 4) {
-      entered.current = true;
-      onEnter();
-    }
+    const dist = carRef.current.distanceTo(new THREE.Vector3(position[0], 0, position[2]));
+    if (dist < 4) { entered.current = true; onEnter(); }
   });
 
   return (
     <group position={position} rotation={[0, rotation, 0]}>
-      {/* Door frame */}
-      <mesh position={[0, 2.5, 0]} castShadow>
-        <boxGeometry args={[6, 5.5, 0.8]} />
-        <meshStandardMaterial color={frameColor} />
+      {/* Archway frame */}
+      <mesh position={[-2.2, 2, 0]} castShadow>
+        <boxGeometry args={[0.8, 4.5, 1]} />
+        <meshStandardMaterial color={darkColor} />
+      </mesh>
+      <mesh position={[2.2, 2, 0]} castShadow>
+        <boxGeometry args={[0.8, 4.5, 1]} />
+        <meshStandardMaterial color={darkColor} />
+      </mesh>
+      <mesh position={[0, 4.5, 0]} castShadow>
+        <boxGeometry args={[5.2, 1, 1]} />
+        <meshStandardMaterial color={darkColor} />
       </mesh>
 
-      {/* Door surface */}
-      <mesh position={[0, 2.5, 0.45]}>
-        <boxGeometry args={[5, 4.8, 0.2]} />
-        <meshStandardMaterial color={doorColor} emissive={doorColor} emissiveIntensity={0.4} />
+      {/* Arch top */}
+      <mesh position={[0, 4.5, 0]} castShadow>
+        <cylinderGeometry args={[1.8, 1.8, 1, 16, 1, false, 0, Math.PI]} rotation={[0, 0, Math.PI / 2]} />
+        <meshStandardMaterial color={darkColor} />
       </mesh>
 
-      {/* Door lines */}
-      {[1.2, 2.4, 3.6].map((y, i) => (
-        <mesh key={i} position={[0, y, 0.6]}>
-          <boxGeometry args={[4.8, 0.08, 0.08]} />
-          <meshStandardMaterial color={frameColor} />
+      {/* Portal glow */}
+      <mesh position={[0, 2, 0.3]}>
+        <planeGeometry args={[3.6, 4]} />
+        <meshStandardMaterial color={mainColor} emissive={mainColor} emissiveIntensity={0.8} transparent opacity={0.9} />
+      </mesh>
+
+      {/* Portal particles/stars */}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <mesh key={i} position={[(Math.random() - 0.5) * 3, 1 + Math.random() * 2.5, 0.4]}>
+          <sphereGeometry args={[0.08 + Math.random() * 0.08, 6, 6]} />
+          <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={2} />
         </mesh>
       ))}
 
-      {/* Glow area on ground */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 3]}>
-        <circleGeometry args={[4, 32]} />
-        <meshStandardMaterial color={doorColor} transparent opacity={0.3} emissive={doorColor} emissiveIntensity={0.5} />
-      </mesh>
-
-      {/* Label sign */}
-      <mesh position={[0, 5.5, 0]}>
-        <boxGeometry args={[5, 1, 0.3]} />
-        <meshStandardMaterial color="#1f2937" />
+      {/* Ground glow */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 2]}>
+        <circleGeometry args={[3.5, 24]} />
+        <meshStandardMaterial color={mainColor} transparent opacity={0.4} emissive={mainColor} emissiveIntensity={0.3} />
       </mesh>
     </group>
   );
 }
 
-// 3D Text (simple block letters)
-function BlockText({ text, position, color }: { text: string; position: [number, number, number]; color: string }) {
-  return (
-    <group position={position}>
-      {text.split("").map((char, i) => (
-        <mesh key={i} position={[i * 1.2 - (text.length * 1.2) / 2 + 0.6, 0.5, 0]} castShadow>
-          <boxGeometry args={[1, 1, 0.5]} />
-          <meshStandardMaterial color={color} roughness={0.3} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
+// Main scene
+function GameScene({ onFinish, gameStarted }: { onFinish: (choice: "red" | "blue") => void; gameStarted: boolean }) {
+  const carPosition = useRef(new THREE.Vector3(0, 0.6, 0));
 
-// Main game scene
-function GameScene({
-  onFinish,
-  gameStarted,
-}: {
-  onFinish: (choice: "red" | "blue") => void;
-  gameStarted: boolean;
-}) {
-  const carPosition = useRef(new THREE.Vector3(0, 0.5, 0));
-
-  const handlePositionUpdate = (pos: THREE.Vector3) => {
-    carPosition.current.copy(pos);
-  };
+  // Grass tufts scattered in grass patches
+  const grassTufts = useMemo(() => {
+    const tufts: [number, number, number][] = [];
+    const patchCenters = [
+      [-25, 0], [25, 0], [-20, 25], [20, -20], [0, -25], [-30, -15], [30, 15],
+      [-15, 30], [15, -30], [35, -5], [-35, 5]
+    ];
+    for (const [cx, cz] of patchCenters) {
+      for (let i = 0; i < 15; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * 6;
+        tufts.push([cx + Math.cos(angle) * dist, 0, cz + Math.sin(angle) * dist]);
+      }
+    }
+    return tufts;
+  }, []);
 
   return (
     <>
-      {/* Lighting */}
-      <ambientLight intensity={0.6} />
+      {/* Bright cheerful lighting */}
+      <ambientLight intensity={0.6} color="#ffffff" />
       <directionalLight
-        position={[30, 50, 20]}
-        intensity={1.5}
+        position={[30, 60, 20]}
+        intensity={1.2}
+        color="#ffeaa7"
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-camera-far={150}
-        shadow-camera-left={-50}
-        shadow-camera-right={50}
-        shadow-camera-top={50}
-        shadow-camera-bottom={-50}
+        shadow-camera-left={-60}
+        shadow-camera-right={60}
+        shadow-camera-top={60}
+        shadow-camera-bottom={-60}
       />
-      <hemisphereLight args={["#87ceeb", "#4ade80", 0.5]} />
+      <hemisphereLight args={["#74b9ff", "#55efc4", 0.3]} />
 
-      {/* Sky */}
-      <color attach="background" args={["#87ceeb"]} />
-      <fog attach="fog" args={["#87ceeb", 60, 150]} />
+      {/* Bright sky */}
+      <color attach="background" args={["#81ecec"]} />
+      <fog attach="fog" args={["#81ecec", 60, 150]} />
 
-      {/* Ground */}
       <Ground />
 
-      {/* Path/road areas - darker grass patches */}
-      {[
-        [0, 0],
-        [10, 5],
-        [20, 0],
-        [-10, 5],
-        [-20, 10],
-        [15, 20],
-        [-15, 25],
-        [0, 30],
-        [25, 15],
-        [-25, 5],
-      ].map((pos, i) => (
-        <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[pos[0], 0.01, pos[1]]}>
-          <circleGeometry args={[8, 32]} />
-          <meshStandardMaterial color="#22c55e" />
-        </mesh>
+      {/* Grass tufts */}
+      {grassTufts.map((pos, i) => (
+        <GrassTuft key={i} position={pos} />
       ))}
 
-      {/* Scattered bumpable blocks */}
-      <Block position={[-8, 0, 8]} color="#f97316" />
-      <Block position={[8, 0, 6]} color="#8b5cf6" />
-      <Block position={[-5, 0, -8]} color="#ec4899" />
-      <Block position={[10, 0, -5]} color="#06b6d4" />
-      <Block position={[-15, 0, 12]} color="#eab308" />
-      <Block position={[15, 0, 10]} color="#14b8a6" />
-      <Block position={[0, 0, 15]} size={[2, 2, 2]} color="#f43f5e" />
-      <Block position={[-12, 0, 20]} color="#a855f7" />
-      <Block position={[12, 0, 22]} color="#3b82f6" />
-
-      {/* Scattered balls */}
-      <Ball position={[-3, 0, 5]} color="#fbbf24" radius={0.7} />
-      <Ball position={[5, 0, -3]} color="#f472b6" radius={0.6} />
-      <Ball position={[-10, 0, 0]} color="#34d399" radius={0.8} />
-      <Ball position={[18, 0, 8]} color="#60a5fa" radius={0.9} />
-      <Ball position={[-8, 0, 25]} color="#c084fc" radius={0.7} />
-      <Ball position={[5, 0, 18]} color="#fb923c" radius={0.6} />
-
-      {/* Trees around the edges */}
+      {/* Trees - colorful variety */}
       {[
-        [-25, -20], [-20, -25], [-30, 0], [-28, 15], [-25, 30],
-        [25, -20], [30, -10], [28, 10], [25, 25], [30, 35],
-        [-15, -22], [0, -25], [15, -22],
-        [-20, 35], [0, 38], [20, 35],
-      ].map((pos, i) => (
+        { pos: [-22, -20], color: "green", scale: 1.2 },
+        { pos: [-30, 5], color: "pink", scale: 1 },
+        { pos: [-25, 25], color: "orange", scale: 1.1 },
+        { pos: [25, -22], color: "lightgreen", scale: 1 },
+        { pos: [30, 8], color: "pink", scale: 1.3 },
+        { pos: [28, 22], color: "yellow", scale: 0.9 },
+        { pos: [-18, -32], color: "purple", scale: 1 },
+        { pos: [12, -28], color: "green", scale: 1.1 },
+        { pos: [-28, 35], color: "orange", scale: 1.2 },
+        { pos: [35, -12], color: "pink", scale: 0.9 },
+        { pos: [-35, -8], color: "lightgreen", scale: 1 },
+        { pos: [40, 18], color: "green", scale: 1.1 },
+      ].map((tree, i) => (
         <group key={i}>
-          <Tree position={[pos[0], 0, pos[1]]} />
-          <TreeCollider position={[pos[0], 0, pos[1]]} />
+          <FluffyTree position={[tree.pos[0], 0, tree.pos[1]]} color={tree.color} scale={tree.scale} />
+          <TreeCollider position={[tree.pos[0], 0, tree.pos[1]]} />
         </group>
       ))}
 
-      {/* Garage doors placed in the world */}
-      <GarageDoor
-        position={[-18, 0, 30]}
-        rotation={0.3}
-        color="red"
-        label="THE REAL ME"
-        carRef={carPosition}
-        onEnter={() => onFinish("red")}
-      />
-      <GarageDoor
-        position={[18, 0, 28]}
-        rotation={-0.3}
-        color="blue"
-        label="PROFESSIONAL"
-        carRef={carPosition}
-        onEnter={() => onFinish("blue")}
-      />
+      {/* Bushes */}
+      {[
+        [-15, 8], [14, 6], [-8, -15], [10, -12], [-18, 18], [16, 16],
+      ].map(([x, z], i) => (
+        <Bush key={i} position={[x, 0, z]} color={["#00b894", "#55efc4", "#00cec9"][i % 3]} />
+      ))}
 
-      {/* Welcome text blocks on ground */}
-      <BlockText text="WELCOME" position={[0, 0, -10]} color="#1e40af" />
-      <BlockText text="EXPLORE" position={[0, 0, -6]} color="#166534" />
+      {/* Name text - center stage */}
+      <NameText3D position={[0, 0, -10]} />
 
-      {/* Arrow markers pointing to doors */}
-      <mesh rotation={[-Math.PI / 2, 0, 0.5]} position={[-10, 0.02, 20]}>
-        <planeGeometry args={[3, 1.5]} />
-        <meshStandardMaterial color="#dc2626" />
-      </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, -0.5]} position={[10, 0.02, 20]}>
-        <planeGeometry args={[3, 1.5]} />
-        <meshStandardMaterial color="#2563eb" />
-      </mesh>
+      {/* Colorful crates to bump */}
+      <Crate position={[-6, 0, 8]} color="#ff6b6b" />
+      <Crate position={[7, 0, 6]} color="#74b9ff" />
+      <Crate position={[-5, 0, -3]} color="#ffd93d" />
+      <Crate position={[6, 0, -2]} color="#6bcb77" />
+      <Crate position={[0, 0, 12]} color="#a29bfe" />
 
-      {/* Car and camera */}
+      {/* Bowling pins - fun to knock over */}
+      {[
+        [-3, 15], [-2.5, 16], [-3.5, 16], [-2, 17], [-3, 17], [-4, 17],
+        [3, 15], [3.5, 16], [2.5, 16], [4, 17], [3, 17], [2, 17],
+      ].map(([x, z], i) => (
+        <BowlingPin key={i} position={[x, 0, z]} />
+      ))}
+
+      {/* Rocks */}
+      <Rock position={[-12, 0, -5]} scale={1.2} />
+      <Rock position={[11, 0, -6]} scale={0.9} />
+      <Rock position={[-14, 0, 12]} scale={1} />
+      <Rock position={[13, 0, 10]} scale={1.1} />
+
+      {/* Balloons - decorative */}
+      <Balloon position={[-10, 0, 28]} color="#ff6b6b" />
+      <Balloon position={[-8, 0, 30]} color="#ffd93d" />
+      <Balloon position={[8, 0, 28]} color="#74b9ff" />
+      <Balloon position={[10, 0, 30]} color="#6bcb77" />
+
+      {/* Portal doors */}
+      <PortalDoor position={[-12, 0, 35]} rotation={0.15} color="red" carRef={carPosition} onEnter={() => onFinish("red")} label="THE REAL ME" />
+      <PortalDoor position={[12, 0, 35]} rotation={-0.15} color="blue" carRef={carPosition} onEnter={() => onFinish("blue")} label="PROFESSIONAL" />
+
+      {/* Car */}
       {gameStarted && (
         <>
-          <Car onPositionUpdate={handlePositionUpdate} carRef={carPosition} />
+          <Truck onPositionUpdate={(pos) => carPosition.current.copy(pos)} carRef={carPosition} />
           <FollowCamera target={carPosition} />
         </>
       )}
@@ -545,54 +760,33 @@ export function PillSelection({ onSelect }: PillSelectionProps) {
   };
 
   return (
-    <motion.div
-      className="fixed inset-0 z-[9999] bg-black overflow-hidden"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <Canvas shadows camera={{ position: [0, 25, -20], fov: 50 }}>
+    <motion.div className="fixed inset-0 z-[9999] bg-black overflow-hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      <Canvas shadows camera={{ position: [0, 18, -14], fov: 55 }}>
         <Physics gravity={[0, -40, 0]} broadphase="SAP" allowSleep={false}>
           <GameScene onFinish={handleFinish} gameStarted={gameStarted} />
         </Physics>
       </Canvas>
 
-      {/* UI Overlay */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Title */}
-        <motion.div
-          className="absolute top-6 left-0 right-0 text-center"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+        <motion.div className="absolute top-6 left-0 right-0 text-center" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
           {!gameStarted && (
             <>
-              <h1 className="text-4xl md:text-6xl font-bold text-white drop-shadow-lg mb-2">
-                CHOOSE YOUR PATH
-              </h1>
-              <p className="text-white/80 text-lg">
-                Drive around and explore! Find the door that calls to you.
-              </p>
+              <h1 className="text-4xl md:text-6xl font-bold text-gray-800 drop-shadow-lg mb-2">CHOOSE YOUR PATH</h1>
+              <p className="text-gray-600 text-lg">Drive around and explore!</p>
             </>
           )}
           {gameStarted && !finished && (
-            <p className="text-white/90 text-sm bg-black/30 inline-block px-4 py-2 rounded-full">
-              WASD / Arrow Keys to drive • Explore the world • Drive into a door to choose
+            <p className="text-gray-700 text-sm bg-white/50 inline-block px-4 py-2 rounded-full">
+              WASD / Arrow Keys to drive • Drive into a door to choose
             </p>
           )}
         </motion.div>
 
-        {/* Start button */}
         <AnimatePresence>
           {!gameStarted && !finished && (
-            <motion.div
-              className="absolute inset-0 flex items-center justify-center pointer-events-auto"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
+            <motion.div className="absolute inset-0 flex items-center justify-center pointer-events-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <motion.button
-                className="px-12 py-6 bg-white hover:bg-gray-100 text-gray-900 font-bold text-2xl rounded-2xl shadow-2xl transition-colors"
+                className="px-12 py-6 bg-white hover:bg-gray-100 text-gray-900 font-bold text-2xl rounded-2xl shadow-2xl"
                 onClick={() => setGameStarted(true)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -603,75 +797,31 @@ export function PillSelection({ onSelect }: PillSelectionProps) {
           )}
         </AnimatePresence>
 
-        {/* Direction hints */}
         {gameStarted && !finished && (
           <>
-            <div className="absolute bottom-6 left-6 text-white font-bold text-lg drop-shadow-lg bg-red-600/80 px-4 py-2 rounded-lg">
-              ← THE REAL ME
-            </div>
-            <div className="absolute bottom-6 right-6 text-white font-bold text-lg drop-shadow-lg bg-blue-600/80 px-4 py-2 rounded-lg">
-              PROFESSIONAL →
-            </div>
+            <div className="absolute bottom-6 left-6 text-white font-bold text-lg drop-shadow-lg bg-red-600/80 px-4 py-2 rounded-lg">← THE REAL ME</div>
+            <div className="absolute bottom-6 right-6 text-white font-bold text-lg drop-shadow-lg bg-blue-600/80 px-4 py-2 rounded-lg">PROFESSIONAL →</div>
           </>
         )}
 
-        {/* Finish overlay */}
         <AnimatePresence>
           {finished && selectedDoor && (
-            <motion.div
-              className={`absolute inset-0 flex items-center justify-center ${
-                selectedDoor === "red" ? "bg-red-600/90" : "bg-blue-600/90"
-              }`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <motion.div
-                className="text-center text-white"
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2, type: "spring" }}
-              >
-                <p className="text-5xl md:text-7xl font-bold mb-4">
-                  {selectedDoor === "red" ? "THE REAL ME" : "PROFESSIONAL"}
-                </p>
-                <p className="text-xl opacity-80">Loading your experience...</p>
+            <motion.div className={`absolute inset-0 flex items-center justify-center ${selectedDoor === "red" ? "bg-red-600/90" : "bg-blue-600/90"}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <motion.div className="text-center text-white" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+                <p className="text-5xl md:text-7xl font-bold mb-4">{selectedDoor === "red" ? "THE REAL ME" : "PROFESSIONAL"}</p>
+                <p className="text-xl opacity-80">Loading...</p>
               </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Mobile controls */}
         {gameStarted && !finished && (
           <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 md:hidden pointer-events-auto">
-            <button
-              className="w-16 h-16 bg-white/80 active:bg-white rounded-full text-2xl font-bold shadow-lg"
-              onTouchStart={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "w" }))}
-              onTouchEnd={() => window.dispatchEvent(new KeyboardEvent("keyup", { key: "w" }))}
-            >
-              ▲
-            </button>
+            <button className="w-16 h-16 bg-white/80 rounded-full text-2xl font-bold shadow-lg" onTouchStart={() => window.dispatchEvent(new KeyboardEvent("keydown", { code: "KeyW" }))} onTouchEnd={() => window.dispatchEvent(new KeyboardEvent("keyup", { code: "KeyW" }))}>▲</button>
             <div className="flex gap-2">
-              <button
-                className="w-16 h-16 bg-white/80 active:bg-white rounded-full text-2xl font-bold shadow-lg"
-                onTouchStart={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }))}
-                onTouchEnd={() => window.dispatchEvent(new KeyboardEvent("keyup", { key: "a" }))}
-              >
-                ◀
-              </button>
-              <button
-                className="w-16 h-16 bg-white/80 active:bg-white rounded-full text-2xl font-bold shadow-lg"
-                onTouchStart={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "s" }))}
-                onTouchEnd={() => window.dispatchEvent(new KeyboardEvent("keyup", { key: "s" }))}
-              >
-                ▼
-              </button>
-              <button
-                className="w-16 h-16 bg-white/80 active:bg-white rounded-full text-2xl font-bold shadow-lg"
-                onTouchStart={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "d" }))}
-                onTouchEnd={() => window.dispatchEvent(new KeyboardEvent("keyup", { key: "d" }))}
-              >
-                ▶
-              </button>
+              <button className="w-16 h-16 bg-white/80 rounded-full text-2xl font-bold shadow-lg" onTouchStart={() => window.dispatchEvent(new KeyboardEvent("keydown", { code: "KeyA" }))} onTouchEnd={() => window.dispatchEvent(new KeyboardEvent("keyup", { code: "KeyA" }))}>◀</button>
+              <button className="w-16 h-16 bg-white/80 rounded-full text-2xl font-bold shadow-lg" onTouchStart={() => window.dispatchEvent(new KeyboardEvent("keydown", { code: "KeyS" }))} onTouchEnd={() => window.dispatchEvent(new KeyboardEvent("keyup", { code: "KeyS" }))}>▼</button>
+              <button className="w-16 h-16 bg-white/80 rounded-full text-2xl font-bold shadow-lg" onTouchStart={() => window.dispatchEvent(new KeyboardEvent("keydown", { code: "KeyD" }))} onTouchEnd={() => window.dispatchEvent(new KeyboardEvent("keyup", { code: "KeyD" }))}>▶</button>
             </div>
           </div>
         )}
