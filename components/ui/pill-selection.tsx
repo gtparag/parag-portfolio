@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Physics, useBox, useSphere, usePlane } from "@react-three/cannon";
-import { Instances, Instance } from "@react-three/drei";
+import { Text } from "@react-three/drei";
 import * as THREE from "three";
 
 interface PillSelectionProps {
@@ -434,42 +434,37 @@ function TreeCollider({ position }: { position: [number, number, number] }) {
   return <mesh ref={ref} visible={false} />;
 }
 
-// 3D Text - colorful block letters
+// 3D Text - bold colorful letters
 function NameText3D({ position }: { position: [number, number, number] }) {
-  const text = "PARAG";
-  const text2 = "AMBILDHUKE";
-
-  const Letter = ({ char, pos, color }: { char: string; pos: [number, number, number]; color: string }) => {
-    if (char === " ") return null;
-    return (
-      <group position={pos}>
-        {/* Main block */}
-        <mesh castShadow>
-          <boxGeometry args={[1.4, 2, 0.8]} />
-          <meshStandardMaterial color={color} flatShading />
-        </mesh>
-        {/* Top bevel */}
-        <mesh position={[0, 1.1, 0]} castShadow>
-          <boxGeometry args={[1.2, 0.2, 0.6]} />
-          <meshStandardMaterial color={color} flatShading />
-        </mesh>
-      </group>
-    );
-  };
-
-  const colors1 = ["#ff6b6b", "#ffd93d", "#6bcb77", "#4d96ff", "#ff6b6b"];
-  const colors2 = ["#4d96ff", "#6bcb77", "#ffd93d", "#ff6b6b", "#4d96ff", "#6bcb77", "#ffd93d", "#ff6b6b", "#4d96ff", "#6bcb77"];
-
   return (
-    <group position={position} rotation={[0, 0.2, 0]}>
-      {/* PARAG */}
-      {text.split("").map((char, i) => (
-        <Letter key={`p-${i}`} char={char} pos={[i * 1.7 - 3.4, 1, 0]} color={colors1[i]} />
-      ))}
-      {/* AMBILDHUKE - second row */}
-      {text2.split("").map((char, i) => (
-        <Letter key={`a-${i}`} char={char} pos={[i * 1.7 - 7.5, 1, 3]} color={colors2[i]} />
-      ))}
+    <group position={position} rotation={[-Math.PI / 6, 0.2, 0]}>
+      {/* PARAG - first line */}
+      <Text
+        position={[0, 3, 0]}
+        fontSize={4}
+        color="#ff6b6b"
+        anchorX="center"
+        anchorY="middle"
+        fontWeight="bold"
+        outlineWidth={0.2}
+        outlineColor="#c0392b"
+      >
+        PARAG
+      </Text>
+
+      {/* AMBILDHUKE - second line */}
+      <Text
+        position={[0, -1, 0]}
+        fontSize={2.8}
+        color="#4d96ff"
+        anchorX="center"
+        anchorY="middle"
+        fontWeight="bold"
+        outlineWidth={0.15}
+        outlineColor="#2980b9"
+      >
+        AMBILDHUKE
+      </Text>
     </group>
   );
 }
