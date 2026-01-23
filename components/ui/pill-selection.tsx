@@ -25,12 +25,12 @@ function Truck({
 
   const [, api] = useBox(
     () => ({
-      mass: 20,
+      mass: 50,
       position: [0, 0.6, 0],
       args: [1.4, 0.8, 2.2],
       angularFactor: [0, 1, 0],
-      linearDamping: 0.9,
-      angularDamping: 0.99,
+      linearDamping: 0.5,
+      angularDamping: 0.9,
       allowSleep: false,
     }),
     meshRef
@@ -38,10 +38,12 @@ function Truck({
 
   const controls = useRef({ forward: false, backward: false, left: false, right: false });
   const position = useRef([0, 0.6, 0]);
+  const velocity = useRef([0, 0, 0]);
 
   useEffect(() => {
     const unsubPos = api.position.subscribe((p) => (position.current = p));
-    return () => unsubPos();
+    const unsubVel = api.velocity.subscribe((v) => (velocity.current = v));
+    return () => { unsubPos(); unsubVel(); };
   }, [api]);
 
   useEffect(() => {
@@ -78,11 +80,27 @@ function Truck({
     if (meshRef.current) meshRef.current.rotation.y = yRotation.current;
     api.quaternion.set(0, Math.sin(yRotation.current / 2), 0, Math.cos(yRotation.current / 2));
 
-    const speed = 14;
-    let vx = 0, vz = 0;
-    if (forward) { vx = -Math.sin(yRotation.current) * speed; vz = -Math.cos(yRotation.current) * speed; }
-    if (backward) { vx = Math.sin(yRotation.current) * speed * 0.5; vz = Math.cos(yRotation.current) * speed * 0.5; }
-    if (forward || backward) api.velocity.set(vx, 0, vz);
+    // Apply impulse at body's current position for proper physics
+    const impulseMagnitude = 20;
+    const [px, py, pz] = position.current;
+    if (forward) {
+      const ix = -Math.sin(yRotation.current) * impulseMagnitude;
+      const iz = -Math.cos(yRotation.current) * impulseMagnitude;
+      api.applyImpulse([ix, 0, iz], [px, py, pz]);
+    }
+    if (backward) {
+      const ix = Math.sin(yRotation.current) * impulseMagnitude * 0.5;
+      const iz = Math.cos(yRotation.current) * impulseMagnitude * 0.5;
+      api.applyImpulse([ix, 0, iz], [px, py, pz]);
+    }
+
+    // Clamp max speed
+    const maxSpeed = 15;
+    const currentSpeed = Math.sqrt(velocity.current[0] ** 2 + velocity.current[2] ** 2);
+    if (currentSpeed > maxSpeed) {
+      const scale = maxSpeed / currentSpeed;
+      api.velocity.set(velocity.current[0] * scale, velocity.current[1], velocity.current[2] * scale);
+    }
 
     // Animate wheels
     const wheelSpeed = (forward ? 1 : backward ? -0.5 : 0) * 10 * delta;
