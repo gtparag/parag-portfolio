@@ -434,45 +434,88 @@ function TreeCollider({ position }: { position: [number, number, number] }) {
   return <mesh ref={ref} visible={false} />;
 }
 
-// 3D Text - extruded block letters
-function NameText3D({ position }: { position: [number, number, number] }) {
+// Single physics-enabled 3D letter block
+function PhysicsLetter({ letter, position, color, size = 2 }: {
+  letter: string;
+  position: [number, number, number];
+  color: string;
+  size?: number;
+}) {
   const fontUrl = "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/fonts/helvetiker_bold.typeface.json";
+  const depth = size * 0.5;
+  const boxWidth = size * 0.9;
+  const boxHeight = size * 1.1;
+
+  const [ref, api] = useBox(
+    () => ({
+      mass: 5,
+      position: [position[0], position[1] + boxHeight / 2 + 0.1, position[2]],
+      args: [boxWidth, boxHeight, depth],
+      linearDamping: 0.3,
+      angularDamping: 0.3,
+    }),
+    useRef<THREE.Group>(null)
+  );
+
+  return (
+    <group ref={ref}>
+      {/* Invisible collision box for debugging - remove in production */}
+      {/* <mesh>
+        <boxGeometry args={[boxWidth, boxHeight, depth]} />
+        <meshStandardMaterial color="red" wireframe />
+      </mesh> */}
+
+      {/* 3D Letter - offset to align with physics box center */}
+      <group position={[-boxWidth / 2, -boxHeight / 2, -depth / 2]}>
+        <Text3D
+          font={fontUrl}
+          size={size}
+          height={depth}
+          bevelEnabled
+          bevelThickness={0.04}
+          bevelSize={0.02}
+          bevelSegments={2}
+          castShadow
+        >
+          {letter}
+          <meshStandardMaterial color={color} />
+        </Text3D>
+      </group>
+    </group>
+  );
+}
+
+// 3D Text - extruded block letters with physics
+function NameText3D({ position }: { position: [number, number, number] }) {
+  const colors1 = ["#ff6b6b", "#ffd93d", "#6bcb77", "#4d96ff", "#a29bfe"];
+  const colors2 = ["#fd79a8", "#00b894", "#e17055", "#0984e3", "#6c5ce7", "#00cec9", "#fdcb6e", "#e84393", "#74b9ff", "#55efc4"];
+
+  const letterSpacing = 2.2;
+  const letterSpacing2 = 1.6;
 
   return (
     <group position={position}>
       {/* PARAG - first line */}
-      <Center position={[0, 2.5, 0]}>
-        <Text3D
-          font={fontUrl}
-          size={2.5}
-          height={0.8}
-          bevelEnabled
-          bevelThickness={0.1}
-          bevelSize={0.05}
-          bevelSegments={3}
-          castShadow
-        >
-          PARAG
-          <meshStandardMaterial color="#ff6b6b" flatShading />
-        </Text3D>
-      </Center>
+      {"PARAG".split("").map((char, i) => (
+        <PhysicsLetter
+          key={`p-${i}`}
+          letter={char}
+          position={[(i - 2) * letterSpacing, 0, 0]}
+          color={colors1[i]}
+          size={2}
+        />
+      ))}
 
       {/* AMBILDHUKE - second line */}
-      <Center position={[0, -0.5, 0]}>
-        <Text3D
-          font={fontUrl}
-          size={1.8}
-          height={0.6}
-          bevelEnabled
-          bevelThickness={0.08}
-          bevelSize={0.04}
-          bevelSegments={3}
-          castShadow
-        >
-          AMBILDHUKE
-          <meshStandardMaterial color="#4d96ff" flatShading />
-        </Text3D>
-      </Center>
+      {"AMBILDHUKE".split("").map((char, i) => (
+        <PhysicsLetter
+          key={`a-${i}`}
+          letter={char}
+          position={[(i - 4.5) * letterSpacing2, 0, 4]}
+          color={colors2[i]}
+          size={1.5}
+        />
+      ))}
     </group>
   );
 }
