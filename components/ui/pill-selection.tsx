@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Physics, useBox, useSphere, usePlane } from "@react-three/cannon";
-import { Text } from "@react-three/drei";
+import { Text3D, Center } from "@react-three/drei";
 import * as THREE from "three";
 
 interface PillSelectionProps {
@@ -434,37 +434,45 @@ function TreeCollider({ position }: { position: [number, number, number] }) {
   return <mesh ref={ref} visible={false} />;
 }
 
-// 3D Text - bold colorful letters
+// 3D Text - extruded block letters
 function NameText3D({ position }: { position: [number, number, number] }) {
+  const fontUrl = "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/fonts/helvetiker_bold.typeface.json";
+
   return (
-    <group position={position} rotation={[-Math.PI / 6, 0.2, 0]}>
+    <group position={position}>
       {/* PARAG - first line */}
-      <Text
-        position={[0, 3, 0]}
-        fontSize={4}
-        color="#ff6b6b"
-        anchorX="center"
-        anchorY="middle"
-        fontWeight="bold"
-        outlineWidth={0.2}
-        outlineColor="#c0392b"
-      >
-        PARAG
-      </Text>
+      <Center position={[0, 2.5, 0]}>
+        <Text3D
+          font={fontUrl}
+          size={2.5}
+          height={0.8}
+          bevelEnabled
+          bevelThickness={0.1}
+          bevelSize={0.05}
+          bevelSegments={3}
+          castShadow
+        >
+          PARAG
+          <meshStandardMaterial color="#ff6b6b" flatShading />
+        </Text3D>
+      </Center>
 
       {/* AMBILDHUKE - second line */}
-      <Text
-        position={[0, -1, 0]}
-        fontSize={2.8}
-        color="#4d96ff"
-        anchorX="center"
-        anchorY="middle"
-        fontWeight="bold"
-        outlineWidth={0.15}
-        outlineColor="#2980b9"
-      >
-        AMBILDHUKE
-      </Text>
+      <Center position={[0, -0.5, 0]}>
+        <Text3D
+          font={fontUrl}
+          size={1.8}
+          height={0.6}
+          bevelEnabled
+          bevelThickness={0.08}
+          bevelSize={0.04}
+          bevelSegments={3}
+          castShadow
+        >
+          AMBILDHUKE
+          <meshStandardMaterial color="#4d96ff" flatShading />
+        </Text3D>
+      </Center>
     </group>
   );
 }
