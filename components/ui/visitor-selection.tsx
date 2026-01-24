@@ -156,7 +156,7 @@ export function VisitorSelection({ onSelect }: VisitorSelectionProps) {
               <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ padding: "1px", background: "linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899)", WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)", WebkitMaskComposite: "xor", maskComposite: "exclude" }} />
 
               <div className="relative flex items-start gap-4">
-                <div className={`p-3 rounded-xl ${option.iconBg} shadow-lg transition-all duration-200 group-hover:scale-110 group-hover:shadow-xl`}>
+                <div className={`p-3 rounded-xl ${option.iconBg} shadow-lg group-hover:scale-110`}>
                   <option.icon className="w-6 h-6 text-white" />
                 </div>
                 <div>
