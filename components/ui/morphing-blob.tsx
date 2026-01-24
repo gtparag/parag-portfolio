@@ -90,30 +90,44 @@ const vertexShader = `
   }
 `;
 
-// Fragment shader for gradient coloring
+// Fragment shader for iridescent multicolor effect
 const fragmentShader = `
-  uniform vec3 uColor1;
-  uniform vec3 uColor2;
-  uniform vec3 uColor3;
   uniform float uTime;
 
   varying vec3 vNormal;
   varying vec3 vPosition;
 
+  // HSL to RGB conversion
+  vec3 hsl2rgb(vec3 c) {
+    vec3 rgb = clamp(abs(mod(c.x * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
+    return c.z + c.y * (rgb - 0.5) * (1.0 - abs(2.0 * c.z - 1.0));
+  }
+
   void main() {
-    // Create gradient based on position and normal
-    float mixFactor1 = (vPosition.y + 1.5) / 3.0;
-    float mixFactor2 = (vNormal.x + 1.0) / 2.0;
-
-    vec3 color = mix(uColor1, uColor2, mixFactor1);
-    color = mix(color, uColor3, mixFactor2 * 0.3);
-
-    // Add subtle fresnel effect
+    // View direction for fresnel
     vec3 viewDirection = normalize(cameraPosition - vPosition);
-    float fresnel = pow(1.0 - dot(viewDirection, vNormal), 2.0);
-    color = mix(color, vec3(1.0), fresnel * 0.15);
+    float fresnel = pow(1.0 - dot(viewDirection, vNormal), 3.0);
 
-    gl_FragColor = vec4(color, 0.85);
+    // Create shifting hue based on position, normal, and time
+    float hue1 = vPosition.x * 0.3 + vPosition.y * 0.2 + uTime * 0.1;
+    float hue2 = vNormal.x * 0.5 + vNormal.y * 0.3 + uTime * 0.15;
+    float hue = mod(hue1 + hue2 + fresnel * 0.5, 1.0);
+
+    // Vibrant saturation and lightness
+    float saturation = 0.7 + fresnel * 0.2;
+    float lightness = 0.55 + fresnel * 0.3;
+
+    vec3 color = hsl2rgb(vec3(hue, saturation, lightness));
+
+    // Add specular highlight
+    vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+    float specular = pow(max(dot(reflect(-lightDir, vNormal), viewDirection), 0.0), 32.0);
+    color += vec3(1.0) * specular * 0.5;
+
+    // Add rim glow
+    color += vec3(1.0, 0.9, 0.95) * fresnel * 0.4;
+
+    gl_FragColor = vec4(color, 0.9);
   }
 `;
 
@@ -123,11 +137,8 @@ function Blob() {
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uSpeed: { value: 0.3 },
-      uNoiseStrength: { value: 0.4 },
-      uColor1: { value: new THREE.Color("#a5b4fc") }, // Indigo-300
-      uColor2: { value: new THREE.Color("#c4b5fd") }, // Violet-300
-      uColor3: { value: new THREE.Color("#fbcfe8") }, // Pink-200
+      uSpeed: { value: 0.25 },
+      uNoiseStrength: { value: 0.35 },
     }),
     []
   );
