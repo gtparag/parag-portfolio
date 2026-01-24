@@ -141,19 +141,11 @@ export function VisitorSelection({ onSelect }: VisitorSelectionProps) {
           transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
           className="relative text-center mb-10"
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 15 }}
-            className="inline-block mb-4"
-          >
-            <span className="text-5xl">👋</span>
-          </motion.div>
           <h1 id="visitor-title" className="text-4xl md:text-5xl font-bold text-slate-800 mb-4 tracking-tight">
-            Hey there!
+            Welcome
           </h1>
           <p id="visitor-description" className="text-slate-500 text-lg max-w-md mx-auto">
-            I&apos;m <span className="text-slate-800 font-medium">Parag</span>. Tell me a bit about yourself so I can show you the right stuff.
+            Who are you? This helps me show you the right experience.
           </p>
         </motion.div>
 
