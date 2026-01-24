@@ -1,9 +1,15 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { Briefcase, User, Code, Coffee } from "lucide-react";
 import { VisitorType } from "@/hooks/use-visitor-type";
+
+// Dynamically import the 3D blob to avoid SSR issues
+const MorphingBlob = dynamic(
+  () => import("./morphing-blob").then((mod) => mod.MorphingBlob),
+  { ssr: false }
+);
 
 interface VisitorSelectionProps {
   onSelect: (type: VisitorType) => void;
@@ -15,95 +21,30 @@ const visitorOptions = [
     label: "Recruiter / Hiring Manager",
     description: "Looking for talent",
     icon: Briefcase,
-    iconBg: "bg-gradient-to-br from-blue-600 to-indigo-700",
+    iconBg: "bg-gradient-to-br from-indigo-500 to-purple-600",
   },
   {
     type: "other" as VisitorType,
     label: "Fellow Developer",
     description: "Just browsing",
     icon: Code,
-    iconBg: "bg-gradient-to-br from-violet-600 to-purple-700",
+    iconBg: "bg-gradient-to-br from-violet-500 to-fuchsia-600",
   },
   {
     type: "other" as VisitorType,
     label: "Curious Visitor",
     description: "Exploring the web",
     icon: Coffee,
-    iconBg: "bg-gradient-to-br from-amber-500 to-orange-600",
+    iconBg: "bg-gradient-to-br from-pink-500 to-rose-600",
   },
   {
     type: "other" as VisitorType,
     label: "Someone Else",
     description: "None of the above",
     icon: User,
-    iconBg: "bg-gradient-to-br from-emerald-500 to-teal-600",
+    iconBg: "bg-gradient-to-br from-cyan-500 to-blue-600",
   },
 ];
-
-// Animated dot grid component
-function DotGrid() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animationId: number;
-    let time = 0;
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    const draw = () => {
-      time += 0.005;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      const spacing = 40;
-      const dotSize = 1.5;
-
-      for (let x = 0; x < canvas.width; x += spacing) {
-        for (let y = 0; y < canvas.height; y += spacing) {
-          // Create wave effect
-          const distX = x - canvas.width / 2;
-          const distY = y - canvas.height / 2;
-          const dist = Math.sqrt(distX * distX + distY * distY);
-          const wave = Math.sin(dist * 0.008 - time * 2) * 0.5 + 0.5;
-
-          const opacity = 0.15 + wave * 0.15;
-          const size = dotSize + wave * 0.5;
-
-          ctx.beginPath();
-          ctx.arc(x, y, size, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(100, 116, 139, ${opacity})`;
-          ctx.fill();
-        }
-      }
-
-      animationId = requestAnimationFrame(draw);
-    };
-
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animationId);
-      window.removeEventListener("resize", resize);
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 pointer-events-none"
-    />
-  );
-}
 
 export function VisitorSelection({ onSelect }: VisitorSelectionProps) {
   return (
@@ -118,22 +59,12 @@ export function VisitorSelection({ onSelect }: VisitorSelectionProps) {
       aria-describedby="visitor-description"
     >
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100">
-        {/* Animated dot grid */}
-        <DotGrid />
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-indigo-50/50 to-violet-100/50">
+        {/* 3D Morphing Blob */}
+        <MorphingBlob />
 
-        {/* Radial glow behind content */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="w-[800px] h-[600px] bg-gradient-radial from-blue-200/40 via-violet-200/20 to-transparent blur-3xl"
-            style={{
-              background: "radial-gradient(ellipse at center, rgba(191, 219, 254, 0.4) 0%, rgba(221, 214, 254, 0.2) 40%, transparent 70%)",
-            }}
-          />
-        </div>
+        {/* Subtle vignette */}
+        <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-white/40" />
       </div>
 
       {/* Content with subtle glow backdrop */}
