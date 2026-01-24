@@ -7,7 +7,6 @@ import { Hero } from "@/components/sections/hero";
 import { BluePillContent } from "@/components/sections/blue-pill-content";
 import { RedPillContent } from "@/components/sections/red-pill-content";
 import { MatrixRain } from "@/components/ui/matrix-rain";
-import { PillSelection } from "@/components/ui/pill-selection";
 import { VisitorSelection } from "@/components/ui/visitor-selection";
 import { ModeProvider, useMode } from "@/hooks/use-mode";
 import { VisitorTypeProvider, useVisitorType, VisitorType } from "@/hooks/use-visitor-type";
@@ -148,45 +147,14 @@ function MatrixWebsiteContent() {
   );
 }
 
-// Matrix website with pill selection
+// Matrix website - goes directly to blue pill content
 function MatrixWebsite() {
-  const { setMode } = useMode();
-  const [showPillSelection, setShowPillSelection] = useState(true);
-  const [selectionComplete, setSelectionComplete] = useState(false);
-
-  // Check if pill has been selected before in this session
-  useEffect(() => {
-    const savedPillChoice = sessionStorage.getItem("pillChoice") as "red" | "blue" | null;
-    if (savedPillChoice) {
-      setMode(savedPillChoice);
-      setShowPillSelection(false);
-      setSelectionComplete(true);
-    }
-  }, [setMode]);
-
-  const handlePillSelect = (choice: "red" | "blue") => {
-    sessionStorage.setItem("pillChoice", choice);
-    setMode(choice);
-    setShowPillSelection(false);
-    setTimeout(() => setSelectionComplete(true), 100);
-  };
-
-  return (
-    <>
-      {/* Pill Selection */}
-      <AnimatePresence>
-        {showPillSelection && <PillSelection onSelect={handlePillSelect} />}
-      </AnimatePresence>
-
-      {/* Main Content - only render after pill selection */}
-      {selectionComplete && <MatrixWebsiteContent />}
-    </>
-  );
+  return <MatrixWebsiteContent />;
 }
 
 // Main content component that switches based on visitor type
 function MainContent() {
-  const { visitorType, setVisitorType, isRecruiter } = useVisitorType();
+  const { setVisitorType, isRecruiter } = useVisitorType();
   const [showSelection, setShowSelection] = useState(true);
 
   // Check if visitor type has been selected before in this session
