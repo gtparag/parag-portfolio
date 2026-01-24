@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Briefcase, User, Code, Coffee } from "lucide-react";
+import { Briefcase, Coffee } from "lucide-react";
 import { VisitorType } from "@/hooks/use-visitor-type";
 
 interface VisitorSelectionProps {
@@ -18,24 +18,10 @@ const visitorOptions = [
   },
   {
     type: "other" as VisitorType,
-    label: "Fellow Developer",
-    description: "Just browsing",
-    icon: Code,
-    iconBg: "bg-gradient-to-br from-blue-500 to-cyan-500",
-  },
-  {
-    type: "other" as VisitorType,
-    label: "Curious Visitor",
-    description: "Exploring the web",
+    label: "Just Visiting",
+    description: "Browsing around",
     icon: Coffee,
-    iconBg: "bg-gradient-to-br from-orange-500 to-amber-500",
-  },
-  {
-    type: "other" as VisitorType,
-    label: "Someone Else",
-    description: "None of the above",
-    icon: User,
-    iconBg: "bg-gradient-to-br from-emerald-500 to-teal-500",
+    iconBg: "bg-gradient-to-br from-blue-500 to-cyan-500",
   },
 ];
 
