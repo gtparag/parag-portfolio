@@ -26,14 +26,14 @@ export function Hero() {
         {/* Profile Image - Matrix style */}
         <div className="flex-shrink-0">
           <div
-            className="w-20 h-20 sm:w-24 sm:h-24 rounded-none overflow-hidden border border-[var(--matrix-green)] box-glow flex items-center justify-center bg-black relative"
+            className="w-20 h-20 sm:w-24 sm:h-24 rounded-none overflow-hidden border border-[var(--matrix-green)] box-glow flex items-center justify-center bg-black relative transition-transform duration-300 hover:scale-105 hover:shadow-[0_0_20px_var(--matrix-green)]"
             onMouseEnter={scrambleName}
           >
             <span className="text-2xl sm:text-3xl font-bold text-[var(--matrix-green)] text-glow">
               PA
             </span>
             {/* Scan line effect */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[var(--matrix-green)]/5 to-transparent animate-pulse" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[var(--matrix-green)]/5 to-transparent animate-pulse motion-reduce:animate-none" />
           </div>
         </div>
 
@@ -54,12 +54,12 @@ export function Hero() {
           </p>
 
           {/* Social Links */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1">
             <a
               href={personalInfo.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[var(--text-muted)] hover:text-[var(--matrix-green)] hover:text-glow-subtle transition-all duration-300"
+              className="p-2 -m-2 text-[var(--text-muted)] hover:text-[var(--matrix-green)] hover:text-glow-subtle transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--matrix-green)] focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-sm active:scale-90"
               aria-label="LinkedIn"
             >
               <Linkedin className="w-5 h-5" />
@@ -68,14 +68,14 @@ export function Hero() {
               href={personalInfo.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[var(--text-muted)] hover:text-[var(--matrix-green)] hover:text-glow-subtle transition-all duration-300"
+              className="p-2 -m-2 text-[var(--text-muted)] hover:text-[var(--matrix-green)] hover:text-glow-subtle transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--matrix-green)] focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-sm active:scale-90"
               aria-label="GitHub"
             >
               <Github className="w-5 h-5" />
             </a>
             <a
               href={`mailto:${personalInfo.email}`}
-              className="text-[var(--text-muted)] hover:text-[var(--matrix-green)] hover:text-glow-subtle transition-all duration-300"
+              className="p-2 -m-2 text-[var(--text-muted)] hover:text-[var(--matrix-green)] hover:text-glow-subtle transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--matrix-green)] focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-sm active:scale-90"
               aria-label="Email"
             >
               <Mail className="w-5 h-5" />

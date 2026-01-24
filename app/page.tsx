@@ -117,7 +117,7 @@ function MatrixWebsiteContent() {
               </aside>
 
               {/* Main Content */}
-              <main className="flex-1 pt-16 pb-20 md:pl-8 md:border-l md:border-[var(--matrix-green-dark)]">
+              <main id="main" className="flex-1 pt-16 pb-20 md:pl-8 md:border-l md:border-[var(--matrix-green-dark)]">
                 {/* Hero stays persistent */}
                 <Hero />
 

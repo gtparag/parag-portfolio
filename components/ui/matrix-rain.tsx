@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface MatrixRainProps {
   className?: string;
@@ -8,20 +8,46 @@ interface MatrixRainProps {
 
 export function MatrixRain({ className }: MatrixRainProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
+    // Check for reduced motion preference
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches);
+    };
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  useEffect(() => {
+    // Skip animation if user prefers reduced motion
+    if (prefersReducedMotion) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Set canvas size
+    let resizeTimeout: NodeJS.Timeout;
+    let animationId: number;
+
+    // Set canvas size with debounce
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }, 100);
     };
-    resizeCanvas();
+
+    // Initial size
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     window.addEventListener("resize", resizeCanvas);
 
     // Matrix characters (katakana + numbers + symbols)
@@ -30,16 +56,36 @@ export function MatrixRain({ className }: MatrixRainProps) {
     const charArray = chars.split("");
 
     const fontSize = 14;
-    const columns = Math.floor(canvas.width / fontSize);
+    let columns = Math.floor(canvas.width / fontSize);
 
     // Array to track y position of each column
-    const drops: number[] = [];
+    let drops: number[] = [];
     for (let i = 0; i < columns; i++) {
       drops[i] = Math.random() * -100;
     }
 
-    // Drawing function
-    const draw = () => {
+    let lastTime = 0;
+    const frameInterval = 33; // ~30fps
+
+    // Drawing function with requestAnimationFrame
+    const draw = (timestamp: number) => {
+      // Throttle to ~30fps for performance
+      if (timestamp - lastTime < frameInterval) {
+        animationId = requestAnimationFrame(draw);
+        return;
+      }
+      lastTime = timestamp;
+
+      // Recalculate columns if canvas resized
+      const newColumns = Math.floor(canvas.width / fontSize);
+      if (newColumns !== columns) {
+        columns = newColumns;
+        drops = [];
+        for (let i = 0; i < columns; i++) {
+          drops[i] = Math.random() * -100;
+        }
+      }
+
       // Semi-transparent black to create fade effect
       ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -72,16 +118,29 @@ export function MatrixRain({ className }: MatrixRainProps) {
 
         drops[i]++;
       }
+
+      animationId = requestAnimationFrame(draw);
     };
 
-    // Animation loop
-    const interval = setInterval(draw, 33);
+    // Start animation
+    animationId = requestAnimationFrame(draw);
 
     return () => {
-      clearInterval(interval);
+      cancelAnimationFrame(animationId);
+      clearTimeout(resizeTimeout);
       window.removeEventListener("resize", resizeCanvas);
     };
-  }, []);
+  }, [prefersReducedMotion]);
+
+  // Show static background for reduced motion
+  if (prefersReducedMotion) {
+    return (
+      <div
+        className={`fixed inset-0 z-0 pointer-events-none bg-black ${className || ""}`}
+        style={{ opacity: 0.4 }}
+      />
+    );
+  }
 
   return (
     <canvas
