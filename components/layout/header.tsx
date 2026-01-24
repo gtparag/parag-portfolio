@@ -29,14 +29,14 @@ export function Header() {
             <button
               onClick={handleBackToMenu}
               className={cn(
-                "text-xs transition-all hover:opacity-80",
+                "text-base font-mono tracking-wide transition-all hover:opacity-80 -ml-2",
                 isRedMode
                   ? "text-[var(--matrix-red-dim)] hover:text-[var(--matrix-red)]"
                   : "text-[var(--matrix-green-dim)] hover:text-[var(--matrix-green)]"
               )}
               title="Back to menu"
             >
-              {"<"} EXIT
+              <span className="text-xl mr-1">{"<"}</span> EXIT
             </button>
             <Link href="/" className="group">
               <span
