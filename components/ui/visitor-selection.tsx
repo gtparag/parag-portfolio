@@ -1,15 +1,8 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { Briefcase, User, Code, Coffee } from "lucide-react";
 import { VisitorType } from "@/hooks/use-visitor-type";
-
-// Dynamically import the 3D blob to avoid SSR issues
-const MorphingBlob = dynamic(
-  () => import("./morphing-blob").then((mod) => mod.MorphingBlob),
-  { ssr: false }
-);
 
 interface VisitorSelectionProps {
   onSelect: (type: VisitorType) => void;
@@ -21,30 +14,69 @@ const visitorOptions = [
     label: "Recruiter / Hiring Manager",
     description: "Looking for talent",
     icon: Briefcase,
-    iconBg: "bg-gradient-to-br from-indigo-500 to-purple-600",
+    iconBg: "bg-gradient-to-br from-violet-500 to-purple-600",
   },
   {
     type: "other" as VisitorType,
     label: "Fellow Developer",
     description: "Just browsing",
     icon: Code,
-    iconBg: "bg-gradient-to-br from-violet-500 to-fuchsia-600",
+    iconBg: "bg-gradient-to-br from-blue-500 to-cyan-500",
   },
   {
     type: "other" as VisitorType,
     label: "Curious Visitor",
     description: "Exploring the web",
     icon: Coffee,
-    iconBg: "bg-gradient-to-br from-pink-500 to-rose-600",
+    iconBg: "bg-gradient-to-br from-orange-500 to-amber-500",
   },
   {
     type: "other" as VisitorType,
     label: "Someone Else",
     description: "None of the above",
     icon: User,
-    iconBg: "bg-gradient-to-br from-cyan-500 to-blue-600",
+    iconBg: "bg-gradient-to-br from-emerald-500 to-teal-500",
   },
 ];
+
+// Animated gradient orb component
+function GradientOrb({
+  className,
+  color,
+  size = "600px",
+  duration = 20,
+  delay = 0
+}: {
+  className: string;
+  color: string;
+  size?: string;
+  duration?: number;
+  delay?: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{
+        opacity: [0.4, 0.6, 0.5, 0.7, 0.4],
+        scale: [1, 1.1, 0.95, 1.05, 1],
+        x: [0, 30, -20, 25, 0],
+        y: [0, -25, 30, -15, 0],
+      }}
+      transition={{
+        duration,
+        repeat: Infinity,
+        delay,
+        ease: "easeInOut",
+      }}
+      className={`absolute rounded-full blur-[100px] ${className}`}
+      style={{
+        width: size,
+        height: size,
+        background: color,
+      }}
+    />
+  );
+}
 
 export function VisitorSelection({ onSelect }: VisitorSelectionProps) {
   return (
@@ -58,13 +90,45 @@ export function VisitorSelection({ onSelect }: VisitorSelectionProps) {
       aria-labelledby="visitor-title"
       aria-describedby="visitor-description"
     >
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-indigo-50/50 to-violet-100/50">
-        {/* 3D Morphing Blob */}
-        <MorphingBlob />
+      {/* Background - Animated Gradient Mesh */}
+      <div className="absolute inset-0 bg-[#fafafa] overflow-hidden">
+        {/* Gradient orbs */}
+        <GradientOrb
+          className="-top-[200px] -left-[200px]"
+          color="linear-gradient(135deg, #a78bfa 0%, #818cf8 100%)"
+          size="700px"
+          duration={25}
+          delay={0}
+        />
+        <GradientOrb
+          className="top-[10%] -right-[150px]"
+          color="linear-gradient(135deg, #38bdf8 0%, #22d3ee 100%)"
+          size="600px"
+          duration={22}
+          delay={2}
+        />
+        <GradientOrb
+          className="-bottom-[200px] left-[20%]"
+          color="linear-gradient(135deg, #fb7185 0%, #f472b6 100%)"
+          size="650px"
+          duration={28}
+          delay={4}
+        />
+        <GradientOrb
+          className="bottom-[20%] right-[10%]"
+          color="linear-gradient(135deg, #fbbf24 0%, #fb923c 100%)"
+          size="450px"
+          duration={24}
+          delay={6}
+        />
 
-        {/* Subtle vignette */}
-        <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-white/40" />
+        {/* Subtle noise texture overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.015]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          }}
+        />
       </div>
 
       {/* Content with subtle glow backdrop */}
