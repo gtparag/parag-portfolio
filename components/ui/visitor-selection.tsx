@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Briefcase, User, Code, Coffee } from "lucide-react";
 import { VisitorType } from "@/hooks/use-visitor-type";
@@ -14,53 +15,92 @@ const visitorOptions = [
     label: "Recruiter / Hiring Manager",
     description: "Looking for talent",
     icon: Briefcase,
-    gradient: "from-slate-700 to-slate-600",
-    iconBg: "bg-slate-800",
+    iconBg: "bg-gradient-to-br from-blue-600 to-indigo-700",
   },
   {
     type: "other" as VisitorType,
     label: "Fellow Developer",
     description: "Just browsing",
     icon: Code,
-    gradient: "from-slate-600 to-slate-500",
-    iconBg: "bg-slate-700",
+    iconBg: "bg-gradient-to-br from-violet-600 to-purple-700",
   },
   {
     type: "other" as VisitorType,
     label: "Curious Visitor",
     description: "Exploring the web",
     icon: Coffee,
-    gradient: "from-stone-600 to-stone-500",
-    iconBg: "bg-stone-700",
+    iconBg: "bg-gradient-to-br from-amber-500 to-orange-600",
   },
   {
     type: "other" as VisitorType,
     label: "Someone Else",
     description: "None of the above",
     icon: User,
-    gradient: "from-zinc-600 to-zinc-500",
-    iconBg: "bg-zinc-700",
+    iconBg: "bg-gradient-to-br from-emerald-500 to-teal-600",
   },
 ];
 
-// Animated gradient blob component
-function GradientBlob({ className, delay = 0 }: { className: string; delay?: number }) {
+// Animated dot grid component
+function DotGrid() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animationId: number;
+    let time = 0;
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const draw = () => {
+      time += 0.005;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const spacing = 40;
+      const dotSize = 1.5;
+
+      for (let x = 0; x < canvas.width; x += spacing) {
+        for (let y = 0; y < canvas.height; y += spacing) {
+          // Create wave effect
+          const distX = x - canvas.width / 2;
+          const distY = y - canvas.height / 2;
+          const dist = Math.sqrt(distX * distX + distY * distY);
+          const wave = Math.sin(dist * 0.008 - time * 2) * 0.5 + 0.5;
+
+          const opacity = 0.15 + wave * 0.15;
+          const size = dotSize + wave * 0.5;
+
+          ctx.beginPath();
+          ctx.arc(x, y, size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(100, 116, 139, ${opacity})`;
+          ctx.fill();
+        }
+      }
+
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
   return (
-    <motion.div
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{
-        scale: [0.8, 1.1, 0.9, 1.05, 0.8],
-        opacity: [0.3, 0.5, 0.4, 0.45, 0.3],
-        x: [0, 20, -15, 10, 0],
-        y: [0, -15, 20, -10, 0],
-      }}
-      transition={{
-        duration: 25,
-        repeat: Infinity,
-        delay,
-        ease: "easeInOut",
-      }}
-      className={`absolute rounded-full blur-3xl ${className}`}
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 pointer-events-none"
     />
   );
 }
@@ -77,34 +117,34 @@ export function VisitorSelection({ onSelect }: VisitorSelectionProps) {
       aria-labelledby="visitor-title"
       aria-describedby="visitor-description"
     >
-      {/* Gradient mesh background - light professional */}
-      <div className="absolute inset-0 bg-gradient-to-br from-stone-100 via-slate-50 to-zinc-100">
-        <GradientBlob
-          className="w-[600px] h-[600px] -top-48 -left-48 bg-gradient-to-br from-slate-300/50 to-stone-200/50"
-          delay={0}
-        />
-        <GradientBlob
-          className="w-[500px] h-[500px] top-1/4 -right-32 bg-gradient-to-br from-zinc-200/40 to-slate-300/40"
-          delay={2}
-        />
-        <GradientBlob
-          className="w-[400px] h-[400px] -bottom-32 left-1/4 bg-gradient-to-br from-stone-300/40 to-neutral-200/40"
-          delay={4}
-        />
-        <GradientBlob
-          className="w-[350px] h-[350px] bottom-1/4 right-1/4 bg-gradient-to-br from-gray-200/30 to-slate-200/30"
-          delay={6}
-        />
-        {/* Subtle noise overlay for texture */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIgb3BhY2l0eT0iMC4wMyIvPjwvc3ZnPg==')] opacity-30" />
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100">
+        {/* Animated dot grid */}
+        <DotGrid />
+
+        {/* Radial glow behind content */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="w-[800px] h-[600px] bg-gradient-radial from-blue-200/40 via-violet-200/20 to-transparent blur-3xl"
+            style={{
+              background: "radial-gradient(ellipse at center, rgba(191, 219, 254, 0.4) 0%, rgba(221, 214, 254, 0.2) 40%, transparent 70%)",
+            }}
+          />
+        </div>
       </div>
 
+      {/* Content with subtle glow backdrop */}
       <div className="relative max-w-2xl w-full">
+        {/* Glow behind content */}
+        <div className="absolute -inset-10 bg-white/60 blur-3xl rounded-full" />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
-          className="text-center mb-10"
+          className="relative text-center mb-10"
         >
           <motion.div
             initial={{ scale: 0 }}
@@ -122,7 +162,7 @@ export function VisitorSelection({ onSelect }: VisitorSelectionProps) {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" role="group" aria-label="Visitor type options">
+        <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-4" role="group" aria-label="Visitor type options">
           {visitorOptions.map((option, index) => (
             <motion.button
               key={index}
@@ -130,16 +170,20 @@ export function VisitorSelection({ onSelect }: VisitorSelectionProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + index * 0.1, duration: 0.5, ease: "easeOut" }}
               onClick={() => onSelect(option.type)}
-              whileHover={{ scale: 1.02, y: -2, transition: { duration: 0.15 } }}
+              whileHover={{ scale: 1.03, y: -4, transition: { duration: 0.15 } }}
               whileTap={{ scale: 0.98, transition: { duration: 0.1 } }}
               aria-label={`${option.label}: ${option.description}`}
-              className="group relative p-6 rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white overflow-hidden"
+              className="group relative p-6 rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 overflow-hidden"
             >
-              {/* Card background */}
-              <div className="absolute inset-0 bg-white/70 backdrop-blur-sm border border-slate-200/80 rounded-2xl transition-all duration-300 group-hover:bg-white group-hover:border-slate-300 group-hover:shadow-lg group-hover:shadow-slate-200/50" />
+              {/* Card background with gradient border effect */}
+              <div className="absolute inset-0 bg-white rounded-2xl shadow-sm transition-all duration-200 group-hover:shadow-xl group-hover:shadow-slate-200/60" />
+
+              {/* Gradient border on hover */}
+              <div className="absolute inset-0 rounded-2xl border border-slate-200 group-hover:border-transparent transition-all duration-200" />
+              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ padding: "1px", background: "linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899)", WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)", WebkitMaskComposite: "xor", maskComposite: "exclude" }} />
 
               <div className="relative flex items-start gap-4">
-                <div className={`p-3 rounded-xl ${option.iconBg} shadow-md transition-transform duration-300 group-hover:scale-105`}>
+                <div className={`p-3 rounded-xl ${option.iconBg} shadow-lg transition-all duration-200 group-hover:scale-110 group-hover:shadow-xl`}>
                   <option.icon className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -159,7 +203,7 @@ export function VisitorSelection({ onSelect }: VisitorSelectionProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.9, duration: 0.5 }}
-          className="text-center text-slate-400 text-sm mt-10"
+          className="relative text-center text-slate-400 text-sm mt-10"
         >
           Don&apos;t worry, you can always change this later
         </motion.p>
