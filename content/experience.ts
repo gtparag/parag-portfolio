@@ -30,7 +30,8 @@ export const experiences: Experience[] = [
     endDate: "Apr 2025",
     location: "Atlanta, Georgia",
     team: "Topic Modeling Team under Prof. Kartik Goyal",
-    description: "Unlocking and Analyzing Historical Texts VIP (Vertically Integrated Project) team, pioneering effort in digital humanities.",
+    description:
+      "Unlocking and Analyzing Historical Texts VIP (Vertically Integrated Project) team, pioneering effort in digital humanities.",
     bullets: [
       "Worked on unlocking and analyzing over 5,000 historical texts as part of a pioneering digital humanities effort.",
       "Spearheaded the creation of scraping techniques using ElementTree and analysis of data from EEBO TCP database and 50+ archives worldwide, developing algorithms for over 3,000 document layouts and formats.",

@@ -1,7 +1,7 @@
 export const personalInfo = {
   name: "Parag Ambildhuke",
   title: "Software Engineer & ML Researcher",
-  location: "Atlanta, GA, USA",
+  location: "Seattle, WA, USA",
   education: "Computer Science @ Georgia Tech",
   email: "paragambildhuke7@gmail.com",
   github: "https://github.com/gtparag",
