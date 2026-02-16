@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { PillToggle } from "@/components/ui/pill-toggle";
 import { useMode } from "@/hooks/use-mode";
+import { useVisitorType } from "@/hooks/use-visitor-type";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -17,13 +18,13 @@ const navLinks = [
 
 export function Header() {
   const { mode } = useMode();
+  const { setVisitorType } = useVisitorType();
   const isRedMode = mode === "red";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleBackToMenu = () => {
-    sessionStorage.removeItem("visitorType");
-    sessionStorage.removeItem("pillChoice");
-    window.location.reload();
+  const handleBackToProfessional = () => {
+    sessionStorage.setItem("visitorType", "recruiter");
+    setVisitorType("recruiter");
   };
 
   return (
@@ -43,7 +44,7 @@ export function Header() {
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-4">
               <button
-                onClick={handleBackToMenu}
+                onClick={handleBackToProfessional}
                 className={cn(
                   "text-base font-mono tracking-wide transition-all duration-200 hover:opacity-80 -ml-2 cursor-pointer p-2 -my-2 rounded-sm",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black",

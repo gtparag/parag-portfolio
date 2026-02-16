@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { Header } from "@/components/layout/header";
 import { Hero } from "@/components/sections/hero";
 import { BluePillContent } from "@/components/sections/blue-pill-content";
 import { RedPillContent } from "@/components/sections/red-pill-content";
 import { MatrixRain } from "@/components/ui/matrix-rain";
-import { VisitorSelection } from "@/components/ui/visitor-selection";
 import { ModeProvider, useMode } from "@/hooks/use-mode";
 import { VisitorTypeProvider, useVisitorType, VisitorType } from "@/hooks/use-visitor-type";
 import { cn } from "@/lib/utils";
@@ -154,44 +153,27 @@ function MatrixWebsite() {
 
 // Main content component that switches based on visitor type
 function MainContent() {
-  const { setVisitorType, isRecruiter } = useVisitorType();
-  const [showSelection, setShowSelection] = useState(true);
+  const { visitorType, setVisitorType } = useVisitorType();
 
   // Check if visitor type has been selected before in this session
   useEffect(() => {
     const savedVisitorType = sessionStorage.getItem("visitorType") as VisitorType;
     if (savedVisitorType) {
       setVisitorType(savedVisitorType);
-      setShowSelection(false);
     }
   }, [setVisitorType]);
 
-  const handleVisitorSelect = (type: VisitorType) => {
-    sessionStorage.setItem("visitorType", type || "");
-    setVisitorType(type);
-    setShowSelection(false);
-  };
-
-  // Show visitor selection first
-  if (showSelection) {
+  // Show Matrix website when visitor type is "other"
+  if (visitorType === "other") {
     return (
-      <AnimatePresence>
-        <VisitorSelection onSelect={handleVisitorSelect} />
-      </AnimatePresence>
+      <ModeProvider>
+        <MatrixWebsite />
+      </ModeProvider>
     );
   }
 
-  // Show professional website for recruiters
-  if (isRecruiter) {
-    return <ProfessionalWebsite />;
-  }
-
-  // Show Matrix website for everyone else
-  return (
-    <ModeProvider>
-      <MatrixWebsite />
-    </ModeProvider>
-  );
+  // Default to professional website
+  return <ProfessionalWebsite />;
 }
 
 export default function Home() {

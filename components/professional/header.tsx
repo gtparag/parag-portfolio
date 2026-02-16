@@ -2,13 +2,14 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { useVisitorType } from "@/hooks/use-visitor-type";
 
 export function ProfessionalHeader() {
-  const handleBackToMenu = () => {
-    sessionStorage.removeItem("visitorType");
-    sessionStorage.removeItem("pillChoice");
-    window.location.reload();
+  const { setVisitorType } = useVisitorType();
+
+  const handleViewOlderVersion = () => {
+    sessionStorage.setItem("visitorType", "other");
+    setVisitorType("other");
   };
 
   return (
@@ -20,21 +21,11 @@ export function ProfessionalHeader() {
     >
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleBackToMenu}
-              className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 transition-colors"
-              title="Back to menu"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">Menu</span>
-            </button>
-            <Link href="/" className="group">
-              <span className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                Parag Ambildhuke
-              </span>
-            </Link>
-          </div>
+          <Link href="/" className="group">
+            <span className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+              Parag Ambildhuke
+            </span>
+          </Link>
 
           <nav className="hidden md:flex items-center gap-8">
             <a
@@ -67,6 +58,12 @@ export function ProfessionalHeader() {
             >
               Contact
             </a>
+            <button
+              onClick={handleViewOlderVersion}
+              className="text-sm text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+            >
+              View Older Version
+            </button>
           </nav>
         </div>
       </div>
