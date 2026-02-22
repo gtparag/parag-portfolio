@@ -43,14 +43,4 @@ export const projects: Project[] = [
     technologies: ["Python", "PyTorch", "CNN", "FastAPI", "React"],
     featured: true,
   },
-  {
-    id: "llm-code-assistant",
-    title: "LLM-Powered Code Assistant",
-    description:
-      "AI coding assistant with context-aware suggestions using retrieval-augmented generation.",
-    longDescription:
-      "An intelligent coding assistant that understands your codebase through vector embeddings and provides context-aware suggestions using large language models. Features include semantic code search, automatic documentation generation, and intelligent code completion.",
-    technologies: ["TypeScript", "OpenAI API", "Pinecone", "RAG", "LangChain"],
-    featured: true,
-  },
 ];
