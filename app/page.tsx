@@ -18,11 +18,13 @@ import { ProfessionalExperience } from "@/components/professional/experience";
 import { ProfessionalEducation } from "@/components/professional/education";
 import { ProfessionalProjects } from "@/components/professional/projects";
 import { ProfessionalContact } from "@/components/professional/contact";
+import { ProjectsSidebar } from "@/components/professional/projects-sidebar";
 
 // Professional website for recruiters
 function ProfessionalWebsite() {
   return (
     <div className="min-h-screen bg-gray-50">
+      <ProjectsSidebar />
       <ProfessionalHeader />
       <main className="pt-14">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">

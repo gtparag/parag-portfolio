@@ -2,16 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useVisitorType } from "@/hooks/use-visitor-type";
-
 export function ProfessionalHeader() {
-  const { setVisitorType } = useVisitorType();
-
-  const handleViewOlderVersion = () => {
-    sessionStorage.setItem("visitorType", "other");
-    setVisitorType("other");
-  };
-
   return (
     <motion.header
       initial={{ y: -10, opacity: 0 }}
@@ -58,12 +49,6 @@ export function ProfessionalHeader() {
             >
               Contact
             </a>
-            <button
-              onClick={handleViewOlderVersion}
-              className="text-sm text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-            >
-              View Older Version
-            </button>
           </nav>
         </div>
       </div>
