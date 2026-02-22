@@ -7,7 +7,7 @@ export const personalInfo = {
   github: "https://github.com/gtparag",
   linkedin: "https://linkedin.com/in/parag-am/",
 
-  bio: `Software Engineer and ML Researcher at Georgia Tech, passionate about building intelligent systems that bridge the gap between cutting-edge research and real-world applications. Focused on NLP, deep learning, and creating tools that augment human capabilities.`,
+  bio: ` currently interested in building agentic systems & application`,
 
   shortBio: `Building intelligent systems at the intersection of software engineering and machine learning research.`,
 };
