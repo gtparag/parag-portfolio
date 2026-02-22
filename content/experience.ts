@@ -19,8 +19,17 @@ export const experiences: Experience[] = [
     startDate: "Jun 2025",
     endDate: "Present",
     location: "Greater Seattle Area",
-    team: "Azure Networking Team",
-    skills: ["Web Development", "C#"],
+    team: "Azure Networking Services",
+    skills: [
+      "System Design",
+      "C#",
+      "Python",
+      "Java",
+      "Linux",
+      "KQL",
+      "React",
+      "TypeScript",
+    ],
   },
   {
     id: "georgia-tech-vip",
@@ -51,7 +60,7 @@ export const experiences: Experience[] = [
       "Worked on developing/improving tools that detect anomalies and measure loss in Azure's entire network infrastructure.",
       "Developed tools to monitor datacenter networks keeping the foundation of Azure's infrastructure running smoothly, helping solve outages in the physical network infrastructure in real time.",
     ],
-    skills: ["C++", "C#"],
+    skills: ["C++", "C#", "KQL"],
   },
   {
     id: "georgia-tech-advising",

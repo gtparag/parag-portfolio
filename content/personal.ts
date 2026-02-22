@@ -7,7 +7,7 @@ export const personalInfo = {
   github: "https://github.com/gtparag",
   linkedin: "https://linkedin.com/in/parag-am/",
 
-  bio: ` currently interested in building agentic systems & application`,
+  bio: ` currently interested in building agentic systems & applications`,
 
   shortBio: `Building intelligent systems at the intersection of software engineering and machine learning research.`,
 };
