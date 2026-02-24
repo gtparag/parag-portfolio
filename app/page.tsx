@@ -8,7 +8,11 @@ import { BluePillContent } from "@/components/sections/blue-pill-content";
 import { RedPillContent } from "@/components/sections/red-pill-content";
 import { MatrixRain } from "@/components/ui/matrix-rain";
 import { ModeProvider, useMode } from "@/hooks/use-mode";
-import { VisitorTypeProvider, useVisitorType, VisitorType } from "@/hooks/use-visitor-type";
+import {
+  VisitorTypeProvider,
+  useVisitorType,
+  VisitorType,
+} from "@/hooks/use-visitor-type";
 import { cn } from "@/lib/utils";
 
 // Professional components
@@ -38,7 +42,7 @@ function ProfessionalWebsite() {
       <footer className="border-t border-gray-200 py-6 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-gray-500 text-sm">
-            © {new Date().getFullYear()} Parag Ambildhuke. All rights reserved.
+            © {new Date().getFullYear()} Parag Ambildhuke.
           </p>
         </div>
       </footer>
@@ -76,7 +80,7 @@ function MatrixWebsiteContent() {
                       "block text-xl transition-all hover:text-glow-subtle",
                       isRedMode
                         ? "text-[var(--matrix-red-dim)] hover:text-[var(--matrix-red)]"
-                        : "text-[var(--matrix-green-dim)] hover:text-[var(--matrix-green)]"
+                        : "text-[var(--matrix-green-dim)] hover:text-[var(--matrix-green)]",
                     )}
                   >
                     {">"} about
@@ -87,7 +91,7 @@ function MatrixWebsiteContent() {
                       "block text-xl transition-all hover:text-glow-subtle",
                       isRedMode
                         ? "text-[var(--matrix-red-dim)] hover:text-[var(--matrix-red)]"
-                        : "text-[var(--matrix-green-dim)] hover:text-[var(--matrix-green)]"
+                        : "text-[var(--matrix-green-dim)] hover:text-[var(--matrix-green)]",
                     )}
                   >
                     {">"} work
@@ -98,7 +102,7 @@ function MatrixWebsiteContent() {
                       "block text-xl transition-all hover:text-glow-subtle",
                       isRedMode
                         ? "text-[var(--matrix-red-dim)] hover:text-[var(--matrix-red)]"
-                        : "text-[var(--matrix-green-dim)] hover:text-[var(--matrix-green)]"
+                        : "text-[var(--matrix-green-dim)] hover:text-[var(--matrix-green)]",
                     )}
                   >
                     {">"} built
@@ -109,7 +113,7 @@ function MatrixWebsiteContent() {
                       "block text-xl transition-all hover:text-glow-subtle",
                       isRedMode
                         ? "text-[var(--matrix-red-dim)] hover:text-[var(--matrix-red)]"
-                        : "text-[var(--matrix-green-dim)] hover:text-[var(--matrix-green)]"
+                        : "text-[var(--matrix-green-dim)] hover:text-[var(--matrix-green)]",
                     )}
                   >
                     {">"} contact
@@ -118,7 +122,10 @@ function MatrixWebsiteContent() {
               </aside>
 
               {/* Main Content */}
-              <main id="main" className="flex-1 pt-16 pb-20 md:pl-8 md:border-l md:border-[var(--matrix-green-dark)]">
+              <main
+                id="main"
+                className="flex-1 pt-16 pb-20 md:pl-8 md:border-l md:border-[var(--matrix-green-dark)]"
+              >
                 {/* Hero stays persistent */}
                 <Hero />
 
@@ -139,7 +146,8 @@ function MatrixWebsiteContent() {
         <footer className="border-t border-[var(--matrix-green-dark)] py-6 relative z-10">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <p className="text-center text-[var(--text-muted)] text-sm">
-              {">"} SYSTEM.COPYRIGHT © {new Date().getFullYear()} | parag ambildhuke | all_rights_reserved_
+              {">"} SYSTEM.COPYRIGHT © {new Date().getFullYear()} | parag
+              ambildhuke | all_rights_reserved_
             </p>
           </div>
         </footer>
@@ -159,7 +167,9 @@ function MainContent() {
 
   // Check if visitor type has been selected before in this session
   useEffect(() => {
-    const savedVisitorType = sessionStorage.getItem("visitorType") as VisitorType;
+    const savedVisitorType = sessionStorage.getItem(
+      "visitorType",
+    ) as VisitorType;
     if (savedVisitorType) {
       setVisitorType(savedVisitorType);
     }

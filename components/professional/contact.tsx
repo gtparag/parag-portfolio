@@ -15,10 +15,7 @@ export function ProfessionalContact() {
         transition={{ duration: 0.4 }}
         className="bg-white rounded-xl border border-gray-200 p-6"
       >
-        <p className="text-gray-600 mb-6">
-          I&apos;m always open to discussing new opportunities, interesting projects,
-          or collaborations. Feel free to reach out!
-        </p>
+        <p className="text-gray-600 mb-6">Feel free to reach out!</p>
 
         <div className="grid sm:grid-cols-2 gap-4">
           <a
@@ -45,7 +42,9 @@ export function ProfessionalContact() {
             </div>
             <div>
               <p className="text-sm text-gray-500">LinkedIn</p>
-              <p className="text-gray-900 font-medium">linkedin.com/in/parag-am</p>
+              <p className="text-gray-900 font-medium">
+                linkedin.com/in/parag-am
+              </p>
             </div>
           </a>
 
@@ -70,7 +69,9 @@ export function ProfessionalContact() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Location</p>
-              <p className="text-gray-900 font-medium">{personalInfo.location}</p>
+              <p className="text-gray-900 font-medium">
+                {personalInfo.location}
+              </p>
             </div>
           </div>
         </div>
