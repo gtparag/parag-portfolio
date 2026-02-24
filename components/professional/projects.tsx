@@ -20,7 +20,7 @@ export function ProfessionalProjects() {
           >
             <div className="flex items-start gap-4">
               {/* Icon */}
-              <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 flex items-center justify-center">
+              <div className="shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 flex items-center justify-center">
                 <Code2 className="w-7 h-7 text-blue-600" />
               </div>
 
@@ -31,7 +31,17 @@ export function ProfessionalProjects() {
                     <h3 className="font-semibold text-gray-900 text-lg">
                       {project.title}
                     </h3>
-                    <p className="text-gray-600 mt-1">{project.description}</p>
+                    {(project.date || project.association) && (
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {project.date && (
+                          <span className="text-sm text-gray-400">{project.date}</span>
+                        )}
+                        {project.association && (
+                          <span className="text-sm text-blue-600">· {project.association}</span>
+                        )}
+                      </div>
+                    )}
+                    <p className="text-gray-600 mt-2">{project.description}</p>
                   </div>
 
                   {/* Links */}

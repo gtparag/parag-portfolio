@@ -8,39 +8,78 @@ export interface Project {
   liveUrl?: string;
   image?: string;
   featured: boolean;
+  date?: string;
+  association?: string;
 }
 
 export const projects: Project[] = [
   {
-    id: "emotion-detection",
-    title: "Emotion Detection in Text",
+    id: "secure-usb",
+    title: "Secure USB with Gesture Authentication",
     description:
-      "ML project classifying Twitter messages into 6 distinct emotions using NLP techniques and various classification models.",
+      "Physical working prototype of a secure USB device that authenticates users via gestures & specific touch detection and hides sensitive data with a decoy file system.",
     longDescription:
-      "Developed a comprehensive emotion detection system that analyzes Twitter messages and classifies them into six emotional categories: joy, sadness, anger, fear, love, and surprise. Implemented multiple classification approaches including BERT-based transformers, SVMs, and Naive Bayes, achieving strong accuracy through ensemble methods.",
-    technologies: ["Python", "BERT", "SVM", "Naive Bayes", "NLP", "Scikit-learn"],
+      "Created a physical working prototype of a secure USB device that authenticates users via gestures & specific touch detection and hides sensitive data with a decoy file system.",
+    technologies: ["C++", "ESP32", "Microcontrollers", "3D Printing", "Computer Hardware", "Prototyping"],
+    date: "Feb 2025 – Present",
+    featured: true,
+  },
+  {
+    id: "emotion-detection",
+    title: "In-text Emotion Detection using NLP",
+    description:
+      "NLP project classifying text into 6 fundamental human emotions using deep learning techniques including LSTM, BERT, SVM, and Naive Bayes.",
+    longDescription:
+      "The project is based around using NLP for a more nuanced understanding of emotional context in text using 6 fundamental human emotions: sadness, joy, love, anger, fear, and surprise. Implements text normalization, tokenization and negation handling using Deep Learning techniques like LSTM, BERT, SVM, and Naive Bayes.",
+    technologies: ["Python", "BERT", "LSTM", "SVM", "Naive Bayes", "NLP", "Scikit-learn"],
     githubUrl: "https://github.com/gtparag/CS4641-Project",
+    date: "Feb 2024 – Present",
+    association: "Georgia Institute of Technology",
+    featured: true,
+  },
+  {
+    id: "investing-yellow",
+    title: "Investing Yellow",
+    description:
+      "Fin-tech application enabling users to gain insights into their financial status through an intuitive interface and AI-generated analysis reports. Built in 48 hours at HackGT X.",
+    longDescription:
+      "A fin-tech application built in 48 hours at HackGT X with a team of 4 people. Built using TypeScript, React, and Tailwind CSS for the user interface. Used Node.js and Express.js on AWS for secure backend operations. Integrated Plaid API for smooth transactions and balance checks. Established a robust infrastructure on AWS for scalability, utilizing Route 53, CloudFront, load balancing, and a secure SSL setup.",
+    technologies: ["TypeScript", "React", "Tailwind CSS", "Node.js", "Express.js", "AWS", "Plaid API"],
+    date: "Feb 2024",
     featured: true,
   },
   {
     id: "platformer-game",
     title: "Platformer Jump Game",
     description:
-      "Interactive browser-based platformer game with physics simulation, procedural level generation, and smooth animations.",
+      "2D platformer game with a character that navigates through levels, featuring physics simulation and smooth animations.",
     longDescription:
-      "Built a fully-featured platformer game from scratch using vanilla JavaScript and HTML5 Canvas. Features include realistic physics simulation for jumping and collision detection, procedural level generation, sprite animations, and a scoring system. Optimized for smooth 60fps gameplay.",
-    technologies: ["JavaScript", "HTML5 Canvas", "Game Physics", "CSS3"],
+      "Designed and developed a 2D platformer game with a character that can move left and right to navigate through the levels.",
+    technologies: ["JavaScript", "HTML5", "CSS3", "Java", "Game Design"],
     githubUrl: "https://github.com/gtparag/Platformer-Jump-Game",
+    date: "Apr 2023 – Present",
     featured: true,
   },
   {
-    id: "neural-style-transfer",
-    title: "Neural Style Transfer App",
+    id: "dungeon-royale",
+    title: "Dungeon Royale",
     description:
-      "Deep learning application for artistic image transformation using convolutional neural networks.",
+      "2D dungeon crawler game where the player navigates through dungeon rooms with different layouts and enemies, built in Java on Android Studio.",
     longDescription:
-      "A web application that applies artistic styles from famous paintings to user-uploaded photos using neural style transfer. Leverages pre-trained VGG networks and custom style loss functions to create stunning artistic transformations in real-time.",
-    technologies: ["Python", "PyTorch", "CNN", "FastAPI", "React"],
+      "Created a 2D Dungeon Crawler game where the user controls a player character and navigates through dungeon rooms with different layouts and enemies using Java in Android Studio. The player can attack and destroy enemies, collect powerups, and reach exits to advance. Enemies attack the player, depleting health — if health runs out, the game ends. Players earn a high score displayed on a leaderboard.",
+    technologies: ["Java", "Android Studio", "Mobile Development", "HTML"],
+    date: "Jan 2023 – Present",
+    featured: true,
+  },
+  {
+    id: "netflix-rating",
+    title: "Movie Rating Generator for Netflix",
+    description:
+      "Devised overall and individual movie rating averages on the Netflix database with 17,770 files and over 7 million customer IDs.",
+    longDescription:
+      "Devised the overall and individual movie rating average on Netflix Database with 17770 files with over 7 million customer IDs, movie ratings, and names.",
+    technologies: ["Python", "SQL", "Java"],
+    date: "Oct 2022 – Dec 2022",
     featured: true,
   },
 ];
