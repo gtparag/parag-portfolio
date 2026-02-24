@@ -34,6 +34,7 @@ export const projects: Project[] = [
       "The project is based around using NLP for a more nuanced understanding of emotional context in text using 6 fundamental human emotions: sadness, joy, love, anger, fear, and surprise. Implements text normalization, tokenization and negation handling using Deep Learning techniques like LSTM, BERT, SVM, and Naive Bayes.",
     technologies: ["Python", "BERT", "LSTM", "SVM", "Naive Bayes", "NLP", "Scikit-learn"],
     githubUrl: "https://github.com/gtparag/CS4641-Project",
+    liveUrl: "https://irausch25.github.io/CS4641-Project/",
     date: "Feb 2024 – Present",
     association: "Georgia Institute of Technology",
     featured: true,
@@ -46,6 +47,7 @@ export const projects: Project[] = [
     longDescription:
       "A fin-tech application built in 48 hours at HackGT X with a team of 4 people. Built using TypeScript, React, and Tailwind CSS for the user interface. Used Node.js and Express.js on AWS for secure backend operations. Integrated Plaid API for smooth transactions and balance checks. Established a robust infrastructure on AWS for scalability, utilizing Route 53, CloudFront, load balancing, and a secure SSL setup.",
     technologies: ["TypeScript", "React", "Tailwind CSS", "Node.js", "Express.js", "AWS", "Plaid API"],
+    liveUrl: "https://investingyellow.com/",
     date: "Feb 2024",
     featured: true,
   },
