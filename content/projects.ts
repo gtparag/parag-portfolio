@@ -6,7 +6,7 @@ export interface Project {
   technologies: string[];
   githubUrl?: string;
   liveUrl?: string;
-  image?: string;
+  images?: string[];
   featured: boolean;
   date?: string;
   association?: string;
@@ -21,6 +21,10 @@ export const projects: Project[] = [
     longDescription:
       "Created a physical working prototype of a secure USB device that authenticates users via gestures & specific touch detection and hides sensitive data with a decoy file system.",
     technologies: ["C++", "ESP32", "Microcontrollers", "3D Printing", "Computer Hardware", "Prototyping"],
+    images: [
+      "/projects/secure-usb/secureUsbDesignImage1.jpeg",
+      "/projects/secure-usb/secureUsbDeviceDesignImage2.jpeg",
+    ],
     liveUrl: "https://docs.google.com/presentation/d/1nbkbmD-gurJd2xQznhdY9opFqbysF7rnZlQgjZqUMJg/edit?pli=1&slide=id.p#slide=id.p",
     date: "Feb 2025 – Present",
     featured: true,
