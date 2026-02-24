@@ -21,6 +21,7 @@ export const projects: Project[] = [
     longDescription:
       "Created a physical working prototype of a secure USB device that authenticates users via gestures & specific touch detection and hides sensitive data with a decoy file system.",
     technologies: ["C++", "ESP32", "Microcontrollers", "3D Printing", "Computer Hardware", "Prototyping"],
+    liveUrl: "https://docs.google.com/presentation/d/1nbkbmD-gurJd2xQznhdY9opFqbysF7rnZlQgjZqUMJg/edit?pli=1&slide=id.p#slide=id.p",
     date: "Feb 2025 – Present",
     featured: true,
   },
@@ -57,6 +58,7 @@ export const projects: Project[] = [
       "Designed and developed a 2D platformer game with a character that can move left and right to navigate through the levels.",
     technologies: ["JavaScript", "HTML5", "CSS3", "Java", "Game Design"],
     githubUrl: "https://github.com/gtparag/Platformer-Jump-Game",
+    liveUrl: "https://gtparag.github.io/Platformer-Jump-Game/",
     date: "Apr 2023 – Present",
     featured: true,
   },

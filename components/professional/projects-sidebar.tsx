@@ -10,8 +10,8 @@ export function ProjectsSidebar() {
       {featured.map((project) => (
         <a
           key={project.id}
-          href={project.githubUrl || project.liveUrl || "#projects"}
-          target={project.githubUrl || project.liveUrl ? "_blank" : undefined}
+          href={project.liveUrl || project.githubUrl || "#projects"}
+          target={project.liveUrl || project.githubUrl ? "_blank" : undefined}
           rel="noopener noreferrer"
           title={project.title}
           className="text-gray-400 hover:text-white transition-colors duration-200 text-[11px] font-medium tracking-widest whitespace-nowrap"
