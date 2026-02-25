@@ -3,7 +3,7 @@
 import { projects } from "@/content/projects";
 
 export function ProjectsSidebar() {
-  const featured = projects.filter((p) => p.featured);
+  const featured = projects.filter((p) => p.featured && p.sidebar !== false);
 
   return (
     <div className="fixed right-0 top-0 bottom-0 z-40 hidden lg:flex flex-col items-center justify-center w-8 bg-black gap-8">

@@ -8,6 +8,7 @@ export interface Project {
   liveUrl?: string;
   images?: string[];
   featured: boolean;
+  sidebar?: boolean;
   date?: string;
   association?: string;
 }
@@ -78,6 +79,7 @@ export const projects: Project[] = [
     technologies: ["Java", "Android Studio", "Mobile Development", "HTML"],
     date: "Jan 2023 – Present",
     featured: true,
+    sidebar: false,
   },
   {
     id: "netflix-rating",
