@@ -25,7 +25,7 @@ import { ProfessionalContact } from "@/components/professional/contact";
 // Professional website for recruiters
 function ProfessionalWebsite() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="professional-theme min-h-screen bg-[#FAFAF7]">
       <ProfessionalHeader />
       <main className="pt-14">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,9 +36,9 @@ function ProfessionalWebsite() {
           <ProfessionalContact />
         </div>
       </main>
-      <footer className="border-t border-gray-200 py-6 bg-white">
+      <footer className="border-t border-[#E8E8E0] py-6 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-500 text-sm">
+          <p className="text-center text-[#8d8d83] text-sm">
             © {new Date().getFullYear()} Parag Ambildhuke.
           </p>
         </div>
@@ -155,7 +155,7 @@ function MatrixWebsiteContent() {
 
 // Matrix website - goes directly to blue pill content
 function MatrixWebsite() {
-  return <MatrixWebsiteContent />;
+  return <div className="matrix-theme"><MatrixWebsiteContent /></div>;
 }
 
 // Main content component that switches based on visitor type

@@ -46,12 +46,12 @@ function ExperienceItem({ exp, index }: { exp: typeof experiences[0]; index: num
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
-      className="border-b border-gray-100 last:border-0 py-5"
+      className="border-b border-[#F0F0EA] last:border-0 py-5"
     >
       <div className="flex items-start gap-4">
         {/* Logo */}
-        <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center">
-          {companyLogos[exp.id] || <div className="w-8 h-8 bg-gray-200 rounded" />}
+        <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-[#F5F5F0] border border-[#E8E8E0] flex items-center justify-center">
+          {companyLogos[exp.id] || <div className="w-8 h-8 bg-[#E8E8E0] rounded" />}
         </div>
 
         {/* Content */}
@@ -63,22 +63,22 @@ function ExperienceItem({ exp, index }: { exp: typeof experiences[0]; index: num
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-gray-900">{exp.company}</h3>
+                  <h3 className="font-semibold text-[#1A1A1A]">{exp.company}</h3>
                   {isOpen ? (
-                    <ChevronUp className="w-4 h-4 text-gray-400" />
+                    <ChevronUp className="w-4 h-4 text-[#a8a89f]" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                    <ChevronDown className="w-4 h-4 text-[#a8a89f]" />
                   )}
                 </div>
-                <p className="text-blue-600 text-sm font-medium">{exp.title}</p>
+                <p className="text-[#4d65ff] text-sm font-medium">{exp.title}</p>
                 {exp.location && (
-                  <p className="text-gray-500 text-sm flex items-center gap-1 mt-1">
+                  <p className="text-[#8d8d83] text-sm flex items-center gap-1 mt-1">
                     <MapPin className="w-3 h-3" />
                     {exp.location}
                   </p>
                 )}
               </div>
-              <span className="text-gray-500 text-sm whitespace-nowrap">
+              <span className="text-[#8d8d83] text-sm whitespace-nowrap">
                 {exp.startDate} — {exp.endDate}
               </span>
             </div>
@@ -95,18 +95,18 @@ function ExperienceItem({ exp, index }: { exp: typeof experiences[0]; index: num
               >
                 <div className="mt-3 space-y-3">
                   {exp.team && (
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-[#6B6B63] text-sm">
                       <span className="font-medium">Team:</span> {exp.team}
                     </p>
                   )}
                   {exp.description && (
-                    <p className="text-gray-600 text-sm">{exp.description}</p>
+                    <p className="text-[#6B6B63] text-sm">{exp.description}</p>
                   )}
                   {exp.bullets && exp.bullets.length > 0 && (
                     <ul className="space-y-2">
                       {exp.bullets.map((bullet, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                        <li key={i} className="flex items-start gap-2 text-sm text-[#6B6B63]">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#4d65ff] mt-2 flex-shrink-0" />
                           <span>{bullet}</span>
                         </li>
                       ))}
@@ -117,7 +117,7 @@ function ExperienceItem({ exp, index }: { exp: typeof experiences[0]; index: num
                       {exp.skills.map((skill, i) => (
                         <span
                           key={i}
-                          className="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-full"
+                          className="text-xs px-2 py-1 bg-[#eef0ff] text-[#4d65ff] rounded-full"
                         >
                           {skill}
                         </span>
@@ -137,8 +137,8 @@ function ExperienceItem({ exp, index }: { exp: typeof experiences[0]; index: num
 export function ProfessionalExperience() {
   return (
     <section id="experience" className="py-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Work Experience</h2>
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <h2 className="text-2xl font-bold text-[#1A1A1A] mb-6">Work Experience</h2>
+      <div className="bg-white rounded-2xl border border-[#E8E8E0] shadow-sm p-6">
         {experiences.map((exp, index) => (
           <ExperienceItem key={exp.id} exp={exp} index={index} />
         ))}
