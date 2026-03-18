@@ -15,24 +15,24 @@ export function ProfessionalHero() {
       >
         {/* Profile Image */}
         <div className="flex-shrink-0">
-          <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#eef0ff] to-[#e0e4ff] flex items-center justify-center border-4 border-white shadow-md">
-            <span className="text-4xl font-bold text-[#4d65ff]">PA</span>
+          <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center border-4 border-white shadow-lg">
+            <span className="text-4xl font-bold text-blue-600">PA</span>
           </div>
         </div>
 
         {/* Info */}
         <div className="flex-1">
-          <h1 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             {personalInfo.name}
           </h1>
-          <p className="text-xl text-[#4d65ff] font-medium mb-3">
+          <p className="text-xl text-blue-600 font-medium mb-3">
             Software Engineer & ML Researcher
           </p>
-          <p className="text-[#8d8d83] mb-4 flex items-center gap-2">
+          <p className="text-gray-600 mb-4 flex items-center gap-2">
             <MapPin className="w-4 h-4" />
             {personalInfo.location}
           </p>
-          <p className="text-[#3A3A35] max-w-2xl mb-6 leading-relaxed">
+          <p className="text-gray-700 max-w-2xl mb-6 leading-relaxed">
             {personalInfo.bio}
           </p>
 
@@ -42,7 +42,7 @@ export function ProfessionalHero() {
               href={personalInfo.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-[#4d65ff] text-white rounded-lg hover:bg-[#3d55ef] transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Linkedin className="w-4 h-4" />
               LinkedIn
@@ -51,14 +51,14 @@ export function ProfessionalHero() {
               href={personalInfo.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 border border-[#E8E8E0] text-[#3A3A35] rounded-lg hover:bg-[#F0F0EA] transition-colors"
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <Github className="w-4 h-4" />
               GitHub
             </a>
             <a
               href={`mailto:${personalInfo.email}`}
-              className="flex items-center gap-2 px-4 py-2 border border-[#E8E8E0] text-[#3A3A35] rounded-lg hover:bg-[#F0F0EA] transition-colors"
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <Mail className="w-4 h-4" />
               Email

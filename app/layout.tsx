@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
-import { Share_Tech_Mono, Inter } from "next/font/google";
+import { Share_Tech_Mono } from "next/font/google";
 import "./globals.css";
 
 const shareTechMono = Share_Tech_Mono({
   weight: "400",
   variable: "--font-matrix",
   subsets: ["latin"],
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -54,7 +49,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${shareTechMono.variable} ${inter.variable} antialiased`}>
+      <body className={`${shareTechMono.variable} antialiased`}>
         {children}
       </body>
     </html>

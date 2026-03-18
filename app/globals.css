@@ -47,12 +47,8 @@
   --font-mono: var(--font-matrix), monospace;
 }
 
-.matrix-theme * {
+* {
   font-family: var(--font-matrix), 'Courier New', monospace !important;
-}
-
-.professional-theme {
-  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 body {
