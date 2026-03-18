@@ -51,9 +51,8 @@
   font-family: var(--font-matrix), 'Courier New', monospace !important;
 }
 
-.professional-theme,
-.professional-theme * {
-  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+.professional-theme {
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 body {
@@ -257,27 +256,27 @@ body {
 }
 
 /* Custom scrollbar - Matrix style */
-.matrix-theme ::-webkit-scrollbar {
+::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-.matrix-theme ::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: var(--background);
   border-left: 1px solid var(--matrix-green-dark);
 }
 
-.matrix-theme ::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background: var(--matrix-green-dark);
   border-radius: 0;
 }
 
-.matrix-theme ::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb:hover {
   background: var(--matrix-green-dim);
 }
 
 /* Selection color */
-.matrix-theme ::selection {
+::selection {
   background: var(--matrix-green);
   color: var(--background);
 }

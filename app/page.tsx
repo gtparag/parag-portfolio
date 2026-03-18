@@ -25,9 +25,9 @@ import { ProfessionalContact } from "@/components/professional/contact";
 // Professional website for recruiters
 function ProfessionalWebsite() {
   return (
-    <div className="professional-theme min-h-screen bg-white">
+    <div className="professional-theme min-h-screen bg-[#FAFAF7]">
       <ProfessionalHeader />
-      <main className="pt-16">
+      <main className="pt-14">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ProfessionalHero />
           <ProfessionalExperience />
@@ -36,9 +36,9 @@ function ProfessionalWebsite() {
           <ProfessionalContact />
         </div>
       </main>
-      <footer className="py-12 bg-white">
+      <footer className="border-t border-[#E8E8E0] py-6 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-[#C0C0C0] text-sm">
+          <p className="text-center text-[#8d8d83] text-sm">
             © {new Date().getFullYear()} Parag Ambildhuke.
           </p>
         </div>

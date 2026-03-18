@@ -74,22 +74,22 @@ export function ProfessionalProjects() {
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
 
   return (
-    <section id="projects" className="py-16">
-      <h2 className="text-3xl font-bold text-[#1A1A1A] mb-8 tracking-tight">Projects</h2>
+    <section id="projects" className="py-8">
+      <h2 className="text-2xl font-bold text-[#1A1A1A] mb-6">Projects</h2>
 
-      <div className="grid gap-8">
+      <div className="grid gap-6">
         {projects.filter(p => p.featured).map((project, index) => (
           <motion.div
             key={project.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: index * 0.05 }}
-            className="pb-8 border-b border-[#F0F0F0] last:border-0 last:pb-0"
+            className="bg-white rounded-2xl border border-[#E8E8E0] shadow-sm p-6"
           >
             <div className="flex items-start gap-4">
               {/* Icon */}
-              <div className="shrink-0 w-12 h-12 rounded-xl bg-[#F5F5F5] flex items-center justify-center">
-                <Code2 className="w-6 h-6 text-[#1A1A1A]/40" />
+              <div className="shrink-0 w-14 h-14 rounded-xl bg-linear-to-br from-[#eef0ff] to-[#e0e4ff] border border-[#c8cefc] flex items-center justify-center">
+                <Code2 className="w-7 h-7 text-[#4d65ff]" />
               </div>
 
               {/* Content */}
@@ -102,14 +102,14 @@ export function ProfessionalProjects() {
                     {(project.date || project.association) && (
                       <div className="flex items-center gap-2 mt-0.5">
                         {project.date && (
-                          <span className="text-sm text-[#8d8d83]">{project.date}</span>
+                          <span className="text-sm text-[#a8a89f]">{project.date}</span>
                         )}
                         {project.association && (
-                          <span className="text-sm text-[#8d8d83]">· {project.association}</span>
+                          <span className="text-sm text-[#4d65ff]">· {project.association}</span>
                         )}
                       </div>
                     )}
-                    <p className="text-[#1A1A1A]/60 mt-2 text-[15px] leading-relaxed">{project.description}</p>
+                    <p className="text-[#6B6B63] mt-2">{project.description}</p>
                   </div>
 
                   {/* Links */}
@@ -119,7 +119,7 @@ export function ProfessionalProjects() {
                         href={project.githubUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 text-[#C0C0C0] hover:text-[#1A1A1A] rounded-lg transition-colors"
+                        className="p-2 text-[#8d8d83] hover:text-[#1A1A1A] hover:bg-[#F5F5F0] rounded-lg transition-colors"
                         title="View on GitHub"
                       >
                         <Github className="w-5 h-5" />
@@ -130,7 +130,7 @@ export function ProfessionalProjects() {
                         href={project.liveUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 text-[#C0C0C0] hover:text-[#1A1A1A] rounded-lg transition-colors"
+                        className="p-2 text-[#8d8d83] hover:text-[#1A1A1A] hover:bg-[#F5F5F0] rounded-lg transition-colors"
                         title="View Live"
                       >
                         <ExternalLink className="w-5 h-5" />
@@ -144,7 +144,7 @@ export function ProfessionalProjects() {
                   {project.technologies.map((tech, i) => (
                     <span
                       key={i}
-                      className="text-xs px-2.5 py-1 bg-[#F5F5F5] text-[#1A1A1A]/50 rounded-full"
+                      className="text-xs px-2 py-1 bg-[#F5F5F0] text-[#6B6B63] rounded-full"
                     >
                       {tech}
                     </span>
@@ -158,7 +158,7 @@ export function ProfessionalProjects() {
                       <button
                         key={i}
                         onClick={() => setLightbox({ images: project.images!, index: i })}
-                        className="shrink-0 rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+                        className="shrink-0 rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 transition-colors"
                       >
                         <Image
                           src={src}

@@ -46,12 +46,12 @@ function ExperienceItem({ exp, index }: { exp: typeof experiences[0]; index: num
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
-      className="border-b border-[#F0F0F0] last:border-0 py-6"
+      className="border-b border-[#F0F0EA] last:border-0 py-5"
     >
       <div className="flex items-start gap-4">
         {/* Logo */}
-        <div className="shrink-0 w-12 h-12 rounded-xl bg-[#F5F5F5] flex items-center justify-center">
-          {companyLogos[exp.id] || <div className="w-8 h-8 bg-[#E5E5E5] rounded" />}
+        <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-[#F5F5F0] border border-[#E8E8E0] flex items-center justify-center">
+          {companyLogos[exp.id] || <div className="w-8 h-8 bg-[#E8E8E0] rounded" />}
         </div>
 
         {/* Content */}
@@ -65,12 +65,12 @@ function ExperienceItem({ exp, index }: { exp: typeof experiences[0]; index: num
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold text-[#1A1A1A]">{exp.company}</h3>
                   {isOpen ? (
-                    <ChevronUp className="w-4 h-4 text-[#C0C0C0]" />
+                    <ChevronUp className="w-4 h-4 text-[#a8a89f]" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-[#C0C0C0]" />
+                    <ChevronDown className="w-4 h-4 text-[#a8a89f]" />
                   )}
                 </div>
-                <p className="text-[#1A1A1A]/60 text-sm font-medium">{exp.title}</p>
+                <p className="text-[#4d65ff] text-sm font-medium">{exp.title}</p>
                 {exp.location && (
                   <p className="text-[#8d8d83] text-sm flex items-center gap-1 mt-1">
                     <MapPin className="w-3 h-3" />
@@ -93,20 +93,20 @@ function ExperienceItem({ exp, index }: { exp: typeof experiences[0]; index: num
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="mt-4 space-y-3">
+                <div className="mt-3 space-y-3">
                   {exp.team && (
-                    <p className="text-[#1A1A1A]/60 text-sm">
-                      <span className="font-medium text-[#1A1A1A]/80">Team:</span> {exp.team}
+                    <p className="text-[#6B6B63] text-sm">
+                      <span className="font-medium">Team:</span> {exp.team}
                     </p>
                   )}
                   {exp.description && (
-                    <p className="text-[#1A1A1A]/60 text-sm">{exp.description}</p>
+                    <p className="text-[#6B6B63] text-sm">{exp.description}</p>
                   )}
                   {exp.bullets && exp.bullets.length > 0 && (
                     <ul className="space-y-2">
                       {exp.bullets.map((bullet, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-[#1A1A1A]/60">
-                          <span className="w-1 h-1 rounded-full bg-[#1A1A1A]/30 mt-2 shrink-0" />
+                        <li key={i} className="flex items-start gap-2 text-sm text-[#6B6B63]">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#4d65ff] mt-2 flex-shrink-0" />
                           <span>{bullet}</span>
                         </li>
                       ))}
@@ -117,7 +117,7 @@ function ExperienceItem({ exp, index }: { exp: typeof experiences[0]; index: num
                       {exp.skills.map((skill, i) => (
                         <span
                           key={i}
-                          className="text-xs px-2.5 py-1 bg-[#F5F5F5] text-[#1A1A1A]/60 rounded-full"
+                          className="text-xs px-2 py-1 bg-[#eef0ff] text-[#4d65ff] rounded-full"
                         >
                           {skill}
                         </span>
@@ -136,9 +136,9 @@ function ExperienceItem({ exp, index }: { exp: typeof experiences[0]; index: num
 
 export function ProfessionalExperience() {
   return (
-    <section id="experience" className="py-16">
-      <h2 className="text-3xl font-bold text-[#1A1A1A] mb-8 tracking-tight">Work Experience</h2>
-      <div className="divide-y-0">
+    <section id="experience" className="py-8">
+      <h2 className="text-2xl font-bold text-[#1A1A1A] mb-6">Work Experience</h2>
+      <div className="bg-white rounded-2xl border border-[#E8E8E0] shadow-sm p-6">
         {experiences.map((exp, index) => (
           <ExperienceItem key={exp.id} exp={exp} index={index} />
         ))}

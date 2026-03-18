@@ -5,18 +5,19 @@ import { GraduationCap, Calendar, MapPin } from "lucide-react";
 
 export function ProfessionalEducation() {
   return (
-    <section id="education" className="py-16">
-      <h2 className="text-3xl font-bold text-[#1A1A1A] mb-8 tracking-tight">Education</h2>
+    <section id="education" className="py-8">
+      <h2 className="text-2xl font-bold text-[#1A1A1A] mb-6">Education</h2>
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
+        className="bg-white rounded-2xl border border-[#E8E8E0] shadow-sm p-6"
       >
         <div className="flex items-start gap-4">
           {/* Logo */}
-          <div className="shrink-0 w-12 h-12 rounded-xl bg-[#B3A369] flex items-center justify-center">
-            <GraduationCap className="w-6 h-6 text-white" />
+          <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-[#B3A369] flex items-center justify-center">
+            <GraduationCap className="w-7 h-7 text-white" />
           </div>
 
           {/* Content */}
@@ -24,7 +25,7 @@ export function ProfessionalEducation() {
             <h3 className="font-semibold text-[#1A1A1A] text-lg">
               Georgia Institute of Technology
             </h3>
-            <p className="text-[#1A1A1A]/60 font-medium">
+            <p className="text-[#4d65ff] font-medium">
               Bachelor&apos;s degree, Computer Science
             </p>
             <div className="flex flex-wrap gap-4 mt-2 text-sm text-[#8d8d83]">
