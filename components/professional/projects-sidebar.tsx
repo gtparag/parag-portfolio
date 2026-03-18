@@ -6,7 +6,7 @@ export function ProjectsSidebar() {
   const featured = projects.filter((p) => p.featured && p.sidebar !== false);
 
   return (
-    <div className="fixed right-0 top-0 bottom-0 z-40 hidden lg:flex flex-col items-center justify-center w-8 bg-black gap-8">
+    <div className="fixed right-0 top-0 bottom-0 z-40 hidden lg:flex flex-col items-center justify-center w-16 bg-black gap-6">
       {featured.map((project) => (
         <a
           key={project.id}
@@ -14,10 +14,9 @@ export function ProjectsSidebar() {
           target={project.liveUrl || project.githubUrl ? "_blank" : undefined}
           rel="noopener noreferrer"
           title={project.title}
-          className="text-gray-400 hover:text-white transition-colors duration-200 text-[11px] font-medium tracking-widest whitespace-nowrap"
-          style={{ writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)" }}
+          className="text-gray-400 hover:text-white transition-colors duration-200 text-[11px] font-medium tracking-wide"
         >
-          {project.title}
+          {project.shortTitle || project.title}
         </a>
       ))}
     </div>

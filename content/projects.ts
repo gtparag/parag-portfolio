@@ -1,6 +1,7 @@
 export interface Project {
   id: string;
   title: string;
+  shortTitle?: string;
   description: string;
   longDescription?: string;
   technologies: string[];
@@ -17,6 +18,7 @@ export const projects: Project[] = [
   {
     id: "secure-usb",
     title: "Secure USB with Gesture Authentication",
+    shortTitle: "USB",
     description:
       "Physical working prototype of a secure USB device that authenticates users via gestures & specific touch detection and hides sensitive data with a decoy file system.",
     longDescription:
@@ -33,6 +35,7 @@ export const projects: Project[] = [
   {
     id: "emotion-detection",
     title: "In-text Emotion Detection using NLP",
+    shortTitle: "Emotion",
     description:
       "NLP project classifying text into 6 fundamental human emotions using deep learning techniques including LSTM, BERT, SVM, and Naive Bayes.",
     longDescription:
@@ -47,6 +50,7 @@ export const projects: Project[] = [
   {
     id: "investing-yellow",
     title: "Investing Yellow",
+    shortTitle: "Yellow",
     description:
       "Fin-tech application enabling users to gain insights into their financial status through an intuitive interface and AI-generated analysis reports. Built in 48 hours at HackGT X.",
     longDescription:
@@ -59,6 +63,7 @@ export const projects: Project[] = [
   {
     id: "platformer-game",
     title: "Platformer Jump Game",
+    shortTitle: "Platformer",
     description:
       "2D platformer game with a character that navigates through levels, featuring physics simulation and smooth animations.",
     longDescription:
@@ -84,6 +89,7 @@ export const projects: Project[] = [
   {
     id: "netflix-rating",
     title: "Movie Rating Generator for Netflix",
+    shortTitle: "Netflix",
     description:
       "Devised overall and individual movie rating averages on the Netflix database with 17,770 files and over 7 million customer IDs.",
     longDescription:
